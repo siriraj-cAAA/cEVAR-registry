@@ -1,0 +1,1097 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Siriraj EVAR Registry</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Segoe UI,Arial,sans-serif;background:#07101d;color:#dde5f0;min-height:100vh}
+:root{--blue:#1a6fd4;--cyan:#08c8d0;--green:#0db87a;--amber:#f09030;--red:#e03030;--purple:#7c50d8;--card:#0d2035;--surf:#091929;--bord:#1a3652;--ts:#7a90b0;--tm:#3d5070}
+
+/* Layout */
+#app{display:flex;height:100vh;overflow:hidden}
+#sidebar{width:200px;background:var(--surf);border-right:1px solid var(--bord);display:flex;flex-direction:column;flex-shrink:0}
+#main{flex:1;overflow-y:auto}
+
+/* Sidebar */
+.brand{padding:16px 14px;border-bottom:1px solid var(--bord)}
+.brand-title{color:var(--cyan);font-size:13px;font-weight:800;letter-spacing:.06em}
+.brand-sub{color:var(--tm);font-size:11px;margin-top:2px;margin-bottom:8px}
+.badge{display:inline-block;background:#08c8d022;border:1px solid #08c8d055;color:var(--cyan);border-radius:4px;padding:2px 7px;font-size:10px;font-weight:700;margin:2px 2px 0 0}
+nav{padding:9px 7px;flex:1}
+.nav-btn{display:flex;align-items:center;gap:8px;width:100%;background:none;border:none;border-radius:6px;padding:9px 10px;cursor:pointer;font-size:13px;color:var(--ts);text-align:left;margin-bottom:2px;font-family:inherit;transition:background .15s}
+.nav-btn:hover{background:#ffffff0d}
+.nav-btn.active{background:var(--card);color:#dde5f0;font-weight:700}
+.nav-btn.active .nav-icon{color:var(--cyan)}
+.nav-icon{font-size:14px;color:var(--tm)}
+.new-btn{margin:12px 8px 0;width:calc(100% - 16px);padding:9px;background:var(--blue);color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:12px;font-weight:700;font-family:inherit}
+.new-btn:hover{background:#2a7ee0}
+.sidebar-footer{padding:10px 13px;border-top:1px solid var(--bord);font-size:10px;color:var(--tm);line-height:1.8}
+.conn-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:5px;vertical-align:middle}
+.link-btn{background:none;border:none;color:var(--tm);cursor:pointer;font-size:10px;text-decoration:underline;padding:0;font-family:inherit}
+
+/* Pages */
+.page{padding:20px 24px;display:none}
+.page.active{display:block}
+.page-title{font-size:21px;font-weight:800;color:#dde5f0;margin-bottom:3px;letter-spacing:-.02em}
+.page-sub{font-size:12px;color:var(--tm);margin-bottom:18px}
+
+/* KPIs */
+.kpi-row{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:16px}
+.kpi{background:var(--card);border:1px solid var(--bord);border-radius:10px;padding:14px 16px;flex:1;min-width:110px}
+.kpi-label{color:var(--ts);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:7px}
+.kpi-val{font-size:26px;font-weight:800;font-family:monospace;line-height:1}
+.kpi-sub{color:var(--tm);font-size:11px;margin-top:4px}
+
+/* Charts */
+.charts{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.chart-card{background:var(--card);border:1px solid var(--bord);border-radius:10px;padding:14px 16px}
+.chart-title{color:var(--ts);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px}
+.hbar-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.hbar-label{width:90px;font-size:11px;color:var(--ts);text-align:right;flex-shrink:0;line-height:1.3}
+.hbar-track{flex:1;background:#112240;border-radius:4px;height:20px;overflow:hidden}
+.hbar-fill{height:100%;border-radius:4px;transition:width .4s;min-width:0}
+.hbar-val{width:24px;font-size:11px;color:#dde5f0;font-weight:600}
+.vbar-wrap{display:flex;align-items:flex-end;gap:4px;height:180px;padding-top:20px}
+.vbar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;height:100%;justify-content:flex-end}
+.vbar-num{font-size:11px;color:#dde5f0;font-weight:600}
+.vbar-bar{width:100%;border-radius:3px 3px 0 0;transition:height .4s;min-height:0}
+.vbar-lbl{font-size:10px;color:var(--ts);text-align:center;line-height:1.2;margin-top:4px}
+.donut-wrap{display:flex;flex-direction:column;align-items:center;gap:10px}
+.donut-legend{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.donut-leg-item{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--ts)}
+.donut-leg-dot{width:10px;height:10px;border-radius:2px;flex-shrink:0}
+
+/* Table */
+.tbl-wrap{background:var(--card);border:1px solid var(--bord);border-radius:10px;overflow:hidden}
+.tbl-head{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-bottom:1px solid var(--bord)}
+table{width:100%;border-collapse:collapse}
+th{color:var(--tm);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:9px 10px;text-align:left;border-bottom:1px solid var(--bord);background:#112240;white-space:nowrap;cursor:pointer;user-select:none}
+th:hover{color:var(--cyan)}
+td{padding:7px 10px;font-size:12px;border-bottom:1px solid var(--bord)}
+tr:hover td{background:#ffffff05}
+.mono{font-family:monospace;color:var(--cyan);font-weight:700}
+.dot-g{color:var(--green);font-size:13px}
+.dot-r{color:var(--red);font-size:13px}
+.dot-a{color:var(--amber);font-size:13px}
+.tag{display:inline-block;border-radius:4px;padding:2px 8px;font-size:11px;font-weight:700}
+.tag-blue{background:#1a6fd422;border:1px solid #1a6fd455;color:var(--blue)}
+.tag-cyan{background:#08c8d022;border:1px solid #08c8d055;color:var(--cyan)}
+.tag-green{background:#0db87a22;border:1px solid #0db87a55;color:var(--green)}
+.tag-amber{background:#f0903022;border:1px solid #f0903055;color:var(--amber)}
+.tag-purple{background:#7c50d822;border:1px solid #7c50d855;color:var(--purple)}
+
+/* Form */
+.form-tabs{display:flex;border-bottom:1px solid var(--bord);margin-bottom:18px;flex-shrink:0}
+.form-tab{background:none;border:none;padding:9px 16px;cursor:pointer;font-size:13px;font-weight:700;color:var(--ts);border-bottom:2px solid transparent;margin-bottom:-1px;font-family:inherit}
+.form-tab.active{color:var(--cyan);border-bottom-color:var(--cyan)}
+.form-tab-panel{display:none}
+.form-tab-panel.active{display:block}
+.sec-hdr{color:var(--ts);font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin-top:18px;margin-bottom:9px;padding-bottom:5px;border-bottom:1px solid var(--bord)}
+.grid{display:grid;gap:10px 14px;margin-bottom:14px}
+.g2{grid-template-columns:repeat(2,1fr)}
+.g3{grid-template-columns:repeat(3,1fr)}
+.g4{grid-template-columns:repeat(4,1fr)}
+.g5{grid-template-columns:repeat(5,1fr)}
+.f-label{color:var(--ts);font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;margin-bottom:3px;display:block}
+.f-note{color:var(--tm);font-size:10px;font-weight:400;margin-left:4px}
+input,select{background:#112240;border:1px solid var(--bord);border-radius:6px;color:#dde5f0;padding:7px 10px;font-size:13px;width:100%;outline:none;font-family:inherit}
+input:focus,select:focus{border-color:var(--cyan)}
+.info-box{background:#112240;border:1px solid var(--bord);border-radius:7px;padding:9px 13px;margin-bottom:12px;font-size:12px;color:var(--ts);line-height:1.8}
+.info-box strong{color:var(--cyan)}
+.fu-card{background:var(--card);border:1px solid var(--bord);border-radius:9px;padding:12px 16px;margin-bottom:10px}
+.fu-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:9px}
+.fu-title{color:#dde5f0;font-weight:700;font-size:13px}
+.no-data{color:var(--tm);padding:28px;text-align:center;background:var(--card);border-radius:8px;border:1px solid var(--bord)}
+
+/* Buttons */
+.btn{border-radius:6px;padding:8px 16px;cursor:pointer;font-size:13px;font-weight:600;border:none;font-family:inherit}
+.btn-primary{background:var(--blue);color:#fff}
+.btn-primary:hover{background:#2a7ee0}
+.btn-secondary{background:var(--card);color:var(--ts);border:1px solid var(--bord)!important}
+.btn-danger{background:var(--card);color:var(--red);border:1px solid #e0303044!important}
+.btn-small{padding:3px 9px;font-size:11px}
+.btn-cyan{background:var(--card);color:var(--cyan);border:1px solid #08c8d044!important}
+.btn-amber{background:var(--card);color:var(--amber);border:1px solid #f0903055!important}
+.btn-row{display:flex;gap:8px;align-items:center}
+
+/* Toast */
+#toast{position:fixed;bottom:24px;right:24px;padding:12px 18px;border-radius:8px;font-size:13px;font-weight:600;z-index:9999;box-shadow:0 8px 32px rgba(0,0,0,.5);display:none;align-items:center;gap:12px;max-width:420px;animation:fadein .25s}
+#toast .t-close{background:none;border:none;color:var(--ts);cursor:pointer;font-size:18px;line-height:1;font-family:inherit}
+@keyframes fadein{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.demo-bar{background:#f0903018;border:1px solid #f0903044;border-radius:8px;padding:8px 14px;margin-bottom:14px;color:var(--amber);font-size:12px;font-weight:600}
+
+/* Setup */
+#setup{display:none;min-height:100vh;background:var(--bg);overflow-y:auto;padding:36px 20px 60px;justify-content:center}
+#setup.active{display:flex}
+.setup-inner{width:min(820px,100%)}
+.setup-title{text-align:center;margin-bottom:28px}
+.setup-hero{font-size:26px;font-weight:800;color:#dde5f0;letter-spacing:-.02em;margin-bottom:6px}
+.setup-sub{color:var(--tm);font-size:13px;margin-bottom:14px}
+.setup-card{background:var(--card);border:1px solid var(--bord);border-radius:10px;padding:18px 22px;margin-bottom:18px}
+.setup-step{display:flex;gap:12px;margin-bottom:14px;align-items:flex-start}
+.step-num{width:26px;height:26px;border-radius:50%;background:var(--blue);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex-shrink:0;margin-top:1px}
+.step-title{color:#dde5f0;font-weight:700;font-size:13px;margin-bottom:2px}
+.step-desc{color:var(--ts);font-size:12px;line-height:1.7}
+.url-row{display:flex;gap:8px;margin-bottom:10px}
+.url-row input{flex:1}
+.conn-result{padding:10px 14px;border-radius:7px;font-size:13px;font-weight:600;margin-top:6px}
+.conn-ok{background:#0db87a18;border:1px solid #0db87a55;color:var(--green)}
+.conn-err{background:#e0303018;border:1px solid #e0303055;color:var(--red)}
+.demo-note{color:var(--tm);font-size:12px;margin-left:8px}
+@media(max-width:700px){.charts{grid-template-columns:1fr}.g4{grid-template-columns:repeat(2,1fr)}.g5{grid-template-columns:repeat(2,1fr)}.kpi{min-width:45%}}
+.loading-overlay{position:absolute;inset:0;background:#07101dcc;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:100;display:none}
+.spin{display:inline-block;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+#main{position:relative}
+</style>
+</head>
+<body>
+
+<!-- SETUP -->
+<div id="setup" style="display:none;min-height:100vh;background:#07101d;overflow-y:auto;padding:32px 16px 60px;justify-content:center">
+<div style="width:min(820px,100%)">
+
+  <div style="text-align:center;margin-bottom:28px">
+    <div style="color:#08c8d0;font-size:12px;font-weight:800;letter-spacing:.1em;margin-bottom:5px">SIRIRAJ AORTIC CENTER</div>
+    <div style="color:#dde5f0;font-size:26px;font-weight:800;letter-spacing:-.02em;margin-bottom:8px">Complex EVAR Registry</div>
+    <div style="color:#3d5070;font-size:13px;margin-bottom:20px">SVS 2020 &nbsp;·&nbsp; ESVS 2024 &nbsp;·&nbsp; ESVS 2026</div>
+    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;align-items:center">
+      <button class="btn btn-primary" style="font-size:14px;padding:12px 32px" onclick="startDemo()">&#9654;&nbsp; Open Now with Demo Data</button>
+      <span style="color:#3d5070;font-size:12px">No setup &mdash; works instantly</span>
+    </div>
+  </div>
+
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px">
+    <div style="flex:1;height:1px;background:#1a3652"></div>
+    <div style="color:#3d5070;font-size:11px;white-space:nowrap">CONNECT FREE CLOUD STORAGE SO DATA PERSISTS &amp; IS SHARED WITH YOUR TEAM</div>
+    <div style="flex:1;height:1px;background:#1a3652"></div>
+  </div>
+
+  <!-- Option cards -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px">
+
+    <!-- JSONBin option -->
+    <div style="background:#0d2035;border:2px solid #08c8d0;border-radius:10px;padding:20px 22px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+        <div style="background:#08c8d022;border:1px solid #08c8d055;color:#08c8d0;border-radius:4px;padding:2px 8px;font-size:10px;font-weight:800">RECOMMENDED</div>
+        <div style="color:#08c8d0;font-size:10px;font-weight:700">EASIEST SETUP</div>
+      </div>
+      <div style="color:#dde5f0;font-weight:800;font-size:15px;margin-bottom:4px">&#9749; JSONBin.io</div>
+      <div style="color:#7a90b0;font-size:12px;line-height:1.7;margin-bottom:14px">Free JSON cloud storage. No coding, no scripts, no deployment. Takes 2 minutes to set up. Works from any computer.</div>
+      <div style="display:flex;flex-direction:column;gap:8px;font-size:12px;color:#7a90b0;margin-bottom:14px">
+        <div>&#10003; <span style="color:#dde5f0">Free account at jsonbin.io</span></div>
+        <div>&#10003; <span style="color:#dde5f0">No coding required</span></div>
+        <div>&#10003; <span style="color:#dde5f0">Data accessible from any computer</span></div>
+        <div>&#10003; <span style="color:#dde5f0">Team members can all use the same registry</span></div>
+      </div>
+      <button class="btn btn-primary" style="width:100%;background:#08c8d0;border-color:#08c8d0;color:#07101d;font-size:13px" onclick="showSection('jsonbin')">Set up JSONBin &rarr;</button>
+    </div>
+
+    <!-- Google Sheets option -->
+    <div style="background:#0d2035;border:1px solid #1a3652;border-radius:10px;padding:20px 22px">
+      <div style="color:#3d5070;font-size:10px;font-weight:700;margin-bottom:4px">ALTERNATIVE</div>
+      <div style="color:#dde5f0;font-weight:800;font-size:15px;margin-bottom:4px">&#128202; Google Sheets</div>
+      <div style="color:#7a90b0;font-size:12px;line-height:1.7;margin-bottom:14px">Data stored in your own Google Sheet. Requires running a small script in Google Apps Script (15-minute setup).</div>
+      <div style="display:flex;flex-direction:column;gap:8px;font-size:12px;color:#7a90b0;margin-bottom:14px">
+        <div>&#10003; <span style="color:#dde5f0">Data visible directly in Google Sheets</span></div>
+        <div>&#10003; <span style="color:#dde5f0">Your own Google Drive</span></div>
+        <div style="color:#f09030">&#9888; Requires Apps Script deployment</div>
+        <div style="color:#f09030">&#9888; 15+ minute setup</div>
+      </div>
+      <button class="btn btn-secondary" style="width:100%;font-size:13px" onclick="showSection('gsheets')">Set up Google Sheets &rarr;</button>
+    </div>
+  </div>
+
+  <!-- JSONBin setup section -->
+  <div id="sec-jsonbin" style="display:none;background:#0d2035;border:1px solid #08c8d0;border-radius:10px;padding:22px 26px;margin-bottom:16px">
+    <div style="color:#dde5f0;font-size:15px;font-weight:700;margin-bottom:20px">&#9749; JSONBin.io Setup &mdash; 3 steps</div>
+
+    <div style="display:flex;gap:14px;margin-bottom:18px;padding-bottom:18px;border-bottom:1px solid #1a3652">
+      <div style="width:32px;height:32px;border-radius:50%;background:#08c8d0;color:#07101d;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;flex-shrink:0">1</div>
+      <div>
+        <div style="color:#dde5f0;font-weight:700;font-size:13px;margin-bottom:6px">Create a free account</div>
+        <div style="color:#7a90b0;font-size:12px;line-height:1.8;margin-bottom:8px">Open <a href="https://jsonbin.io" target="_blank" style="color:#08c8d0">jsonbin.io</a> in a new tab. Click <strong style="color:#dde5f0">Sign Up</strong> (top right). Use your email or sign in with Google.</div>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:14px;margin-bottom:18px;padding-bottom:18px;border-bottom:1px solid #1a3652">
+      <div style="width:32px;height:32px;border-radius:50%;background:#08c8d0;color:#07101d;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;flex-shrink:0">2</div>
+      <div style="flex:1">
+        <div style="color:#dde5f0;font-weight:700;font-size:13px;margin-bottom:6px">Get your API Key</div>
+        <div style="color:#7a90b0;font-size:12px;line-height:1.8;margin-bottom:8px">After signing in, click your <strong style="color:#dde5f0">profile icon</strong> (top right) &rarr; <strong style="color:#dde5f0">API Keys</strong>.<br>Click <strong style="color:#dde5f0">+ Create Access Key</strong>. Give it a name like "EVAR Registry". Copy the key that starts with <code style="background:#112240;border-radius:3px;padding:1px 5px;font-size:11px">$2b$...</code></div>
+        <label style="color:#7a90b0;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;display:block;margin-bottom:4px">Paste API Key here</label>
+        <input id="jb-key" type="text" placeholder="$2b$10$..." style="background:#112240;border:1px solid #1a3652;border-radius:6px;color:#dde5f0;padding:8px 12px;font-size:13px;width:100%;outline:none;font-family:monospace">
+      </div>
+    </div>
+
+    <div style="display:flex;gap:14px;margin-bottom:20px">
+      <div style="width:32px;height:32px;border-radius:50%;background:#08c8d0;color:#07101d;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;flex-shrink:0">3</div>
+      <div style="flex:1">
+        <div style="color:#dde5f0;font-weight:700;font-size:13px;margin-bottom:6px">Create a Bin (storage container)</div>
+        <div style="color:#7a90b0;font-size:12px;line-height:1.8;margin-bottom:8px">In JSONBin, click <strong style="color:#dde5f0">+ Create Bin</strong> (left sidebar or homepage).<br>
+        In the editor, type <code style="background:#112240;border-radius:3px;padding:2px 6px;font-size:11px">[]</code> (just two square brackets).<br>
+        Make sure <strong style="color:#dde5f0">Private</strong> is selected. Click <strong style="color:#dde5f0">Create Bin</strong>.<br>
+        The URL will change to something like <code style="background:#112240;border-radius:3px;padding:2px 6px;font-size:11px;color:#08c8d0">https://jsonbin.io/b/6849...</code><br>
+        The part after <code style="background:#112240;border-radius:3px;padding:2px 6px;font-size:11px">/b/</code> is your <strong style="color:#dde5f0">Bin ID</strong>.</div>
+        <label style="color:#7a90b0;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;display:block;margin-bottom:4px">Paste Bin ID here</label>
+        <input id="jb-bin" type="text" placeholder="6849abcd1234..." style="background:#112240;border:1px solid #1a3652;border-radius:6px;color:#dde5f0;padding:8px 12px;font-size:13px;width:100%;outline:none;font-family:monospace">
+      </div>
+    </div>
+
+    <button class="btn btn-primary" onclick="connectJSONBin()" style="width:100%;padding:12px;font-size:14px;background:#08c8d0;border-color:#08c8d0;color:#07101d">Test &amp; Connect JSONBin</button>
+    <div id="jb-result" style="margin-top:10px"></div>
+  </div>
+
+  <!-- Google Sheets setup section -->
+  <div id="sec-gsheets" style="display:none;background:#0d2035;border:1px solid #1a3652;border-radius:10px;padding:22px 26px;margin-bottom:16px">
+    <div style="color:#dde5f0;font-size:15px;font-weight:700;margin-bottom:4px">&#128202; Google Sheets Setup</div>
+    <div style="color:#7a90b0;font-size:12px;margin-bottom:18px">This requires running a small script inside Google Apps Script. Follow every step exactly.</div>
+
+    <div style="display:flex;gap:14px;margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid #1a3652">
+      <div style="width:28px;height:28px;border-radius:50%;background:#1a6fd4;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex-shrink:0">1</div>
+      <div><div style="color:#dde5f0;font-weight:700;font-size:13px;margin-bottom:4px">Open Code_gs.js in a text editor</div>
+      <div style="color:#7a90b0;font-size:12px;line-height:1.7">Open the downloaded <strong style="color:#dde5f0">Code_gs.js</strong> file in Notepad (Windows) or TextEdit (Mac). Press <strong style="color:#dde5f0">Ctrl+A</strong> then <strong style="color:#dde5f0">Ctrl+C</strong> to copy all text.</div></div>
+    </div>
+
+    <div style="display:flex;gap:14px;margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid #1a3652">
+      <div style="width:28px;height:28px;border-radius:50%;background:#1a6fd4;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex-shrink:0">2</div>
+      <div><div style="color:#dde5f0;font-weight:700;font-size:13px;margin-bottom:4px">Open Apps Script from your Google Sheet</div>
+      <div style="color:#7a90b0;font-size:12px;line-height:1.7">In your Google Sheet: click <strong style="color:#dde5f0">Extensions</strong> menu &rarr; <strong style="color:#dde5f0">Apps Script</strong>. A new tab opens showing a code editor with <code style="background:#112240;border-radius:3px;padding:1px 5px;font-size:11px">function myFunction() {}</code></div></div>
+    </div>
+
+    <div style="display:flex;gap:14px;margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid #1a3652">
+      <div style="width:28px;height:28px;border-radius:50%;background:#1a6fd4;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex-shrink:0">3</div>
+      <div><div style="color:#dde5f0;font-weight:700;font-size:13px;margin-bottom:4px">Replace the code</div>
+      <div style="color:#7a90b0;font-size:12px;line-height:1.7">Click <strong style="color:#dde5f0">inside the white code area</strong>. Press <strong style="color:#dde5f0">Ctrl+A</strong> to select all &rarr; press <strong style="color:#dde5f0">Ctrl+V</strong> to paste &rarr; press <strong style="color:#dde5f0">Ctrl+S</strong> to save.</div></div>
+    </div>
+
+    <div style="display:flex;gap:14px;margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid #1a3652">
+      <div style="width:28px;height:28px;border-radius:50%;background:#f09030;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex-shrink:0">4</div>
+      <div><div style="color:#dde5f0;font-weight:700;font-size:13px;margin-bottom:4px">Deploy &rarr; New deployment</div>
+      <div style="color:#7a90b0;font-size:12px;line-height:1.7">Click the blue <strong style="color:#dde5f0">Deploy</strong> button (top right) &rarr; <strong style="color:#dde5f0">New deployment</strong>.<br>Click <strong style="color:#dde5f0">&#9881; gear icon</strong> &rarr; <strong style="color:#dde5f0">Web app</strong>.<br>Set <strong style="color:#0db87a">Execute as: Me</strong> and <strong style="color:#0db87a">Who has access: Anyone</strong> &rarr; click <strong style="color:#dde5f0">Deploy</strong>.</div></div>
+    </div>
+
+    <div style="display:flex;gap:14px;margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid #1a3652">
+      <div style="width:28px;height:28px;border-radius:50%;background:#f09030;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex-shrink:0">5</div>
+      <div><div style="color:#dde5f0;font-weight:700;font-size:13px;margin-bottom:4px">Authorise (the confusing step)</div>
+      <div style="color:#7a90b0;font-size:12px;line-height:1.7">Click <strong style="color:#dde5f0">Authorise access</strong> &rarr; choose your Google account.<br>If you see <strong style="color:#f09030">"Google hasn't verified this app"</strong>:<br>&nbsp;&nbsp;Click <strong style="color:#dde5f0">Advanced</strong> &rarr; <strong style="color:#dde5f0">Go to [app] (unsafe)</strong> &rarr; <strong style="color:#dde5f0">Allow</strong><br><em style="color:#3d5070">This is your own script — it is safe.</em></div></div>
+    </div>
+
+    <div style="display:flex;gap:14px;margin-bottom:18px">
+      <div style="width:28px;height:28px;border-radius:50%;background:#0db87a;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex-shrink:0">6</div>
+      <div style="flex:1"><div style="color:#dde5f0;font-weight:700;font-size:13px;margin-bottom:4px">Copy the Web App URL and paste here</div>
+      <div style="color:#7a90b0;font-size:12px;line-height:1.7;margin-bottom:8px">After authorising, copy the URL ending in <code style="background:#112240;border-radius:3px;padding:1px 5px;font-size:11px">/exec</code></div>
+      <input id="gs-url" type="url" placeholder="https://script.google.com/macros/s/.../exec"
+        style="background:#112240;border:1px solid #1a3652;border-radius:6px;color:#dde5f0;padding:8px 12px;font-size:13px;width:100%;outline:none"
+        onkeydown="if(event.key==='Enter')connectSheets()">
+      </div>
+    </div>
+
+    <button class="btn btn-primary" onclick="connectSheets()" style="width:100%;padding:12px;font-size:14px">Test &amp; Connect Google Sheets</button>
+    <div id="gs-result" style="margin-top:10px"></div>
+  </div>
+
+</div>
+</div>
+
+<!-- MAIN APP -->
+<div id="app" style="display:none">
+  <div id="sidebar">
+    <div class="brand">
+      <div class="brand-title">SIRIRAJ AORTIC</div>
+      <div class="brand-sub">Complex EVAR Registry</div>
+      <span class="badge">SVS 2020</span><span class="badge">ESVS 2024</span><span class="badge">ESVS 2026</span>
+    </div>
+    <nav>
+      <button class="nav-btn active" onclick="showPage('dashboard')" id="nav-dashboard"><span class="nav-icon">◉</span> Dashboard</button>
+      <button class="nav-btn" onclick="showPage('list')" id="nav-list"><span class="nav-icon">⊞</span> Patient Registry</button>
+      <button class="nav-btn" onclick="showPage('export')" id="nav-export"><span class="nav-icon">⬇</span> Export / Data</button>
+      <button class="new-btn" onclick="openForm(null)">+ New Case</button>
+    </nav>
+    <div class="sidebar-footer">
+      <span class="conn-dot" id="connDot" style="background:var(--amber)"></span><span id="connLabel">Connecting…</span><br>
+      <span id="syncTime"></span>
+      <div style="margin-top:6px"><button class="btn btn-secondary btn-small" onclick="loadData()" style="width:100%;font-size:11px">⟳ Refresh</button></div>
+      <div style="margin-top:8px" id="caseCount">0 cases</div>
+      Faculty of Medicine<br>Siriraj · Mahidol<br>
+      <button class="link-btn" onclick="resetSetup()" id="changeUrl">⚙ Change Sheets URL</button>
+    </div>
+  </div>
+  <div id="main">
+    <div class="loading-overlay" id="loadingOverlay"><div class="spin" style="font-size:36px;margin-bottom:12px">⟳</div><div style="color:var(--cyan);font-size:14px;font-weight:700">Loading from Google Sheets…</div></div>
+
+    <!-- DASHBOARD -->
+    <div class="page active" id="page-dashboard">
+      <div style="padding:20px 24px">
+        <div class="page-title">Registry Dashboard</div>
+        <div class="page-sub">SVS 2020 · ESVS 2024 · ESVS 2026 · VASCUNET — Siriraj Aortic Center, Mahidol University</div>
+        <div id="demoBar" class="demo-bar" style="display:none">⚠ Demo mode — data is not saved to Google Sheets. Click "⚙ Connect to Sheets" in the sidebar to set up persistent storage.</div>
+        <div style="display:flex;justify-content:flex-end;gap:8px;margin-bottom:16px">
+          <button class="btn btn-primary" onclick="openForm(null)">+ New Case</button>
+          <button class="btn btn-cyan btn-secondary" onclick="showPage('export')">⬇ Export</button>
+        </div>
+        <div class="kpi-row" id="kpiRow"></div>
+        <div class="charts" id="charts"></div>
+        <div class="tbl-wrap">
+          <div class="tbl-hdr" style="padding:12px 14px;border-bottom:1px solid var(--bord);display:flex;justify-content:space-between;align-items:center">
+            <span style="color:var(--ts);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em">Recent Cases</span>
+            <button class="btn btn-cyan btn-secondary btn-small" onclick="showPage('list')">View All →</button>
+          </div>
+          <div style="overflow-x:auto"><table id="recentTbl"><thead><tr><th>Case ID</th><th>Date</th><th>Diagnosis</th><th>Procedure</th><th>Device</th><th>TS</th><th>SCI</th><th>MAE</th><th>Mort</th></tr></thead><tbody id="recentBody"></tbody></table></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LIST -->
+    <div class="page" id="page-list">
+      <div style="padding:20px 24px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+          <div><div class="page-title">Patient Registry</div><div class="page-sub" id="listSub">0 cases</div></div>
+          <button class="btn btn-primary" onclick="openForm(null)">+ New Case</button>
+        </div>
+        <input type="text" id="searchBox" placeholder="Search by Case ID, HN, Diagnosis or Procedure…" oninput="renderList()" style="width:340px;margin-bottom:12px">
+        <div class="tbl-wrap"><div style="overflow-x:auto"><table id="listTbl"><thead><tr>
+          <th onclick="sortBy('id')">Case ID</th><th onclick="sortBy('procedureDate')">Date</th>
+          <th onclick="sortBy('age')">Age/Sex</th><th onclick="sortBy('diagnosis')">Diagnosis</th>
+          <th onclick="sortBy('extent')">Extent</th><th onclick="sortBy('procType')">Procedure</th>
+          <th onclick="sortBy('deviceStrategy')">Device</th><th onclick="sortBy('ifu')">IFU</th>
+          <th>TS/SCI/MAE/Mort</th><th>Actions</th>
+        </tr></thead><tbody id="listBody"></tbody></table></div></div>
+      </div>
+    </div>
+
+    <!-- FORM -->
+    <div class="page" id="page-form">
+      <div style="padding:18px 22px;height:100%;display:flex;flex-direction:column">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-shrink:0">
+          <div><div class="page-title" id="formTitle">New Case</div><div class="page-sub">SVS 2020 · ESVS 2024 · ESVS 2026 Compliant</div></div>
+          <div class="btn-row">
+            <span id="savingMsg" style="color:var(--amber);font-size:12px;display:none">⟳ Saving to Sheets…</span>
+            <button class="btn btn-secondary" onclick="cancelForm()">Cancel</button>
+            <button class="btn btn-primary" onclick="saveForm()" id="saveBtn">💾 Save</button>
+          </div>
+        </div>
+        <div class="form-tabs" id="formTabs">
+          <button class="form-tab active" onclick="showTab(0)">Demographics</button>
+          <button class="form-tab" onclick="showTab(1)">Anatomy</button>
+          <button class="form-tab" onclick="showTab(2)">Procedure</button>
+          <button class="form-tab" onclick="showTab(3)">Outcomes</button>
+          <button class="form-tab" onclick="showTab(4)">Follow-Up</button>
+        </div>
+        <div style="overflow-y:auto;flex:1" id="formBody"></div>
+      </div>
+    </div>
+
+    <!-- EXPORT -->
+    <div class="page" id="page-export">
+      <div style="padding:20px 24px">
+        <div class="page-title">Export &amp; Data Access</div>
+        <div class="page-sub" id="exportSub">Loading…</div>
+        <div id="sheetsLink" style="display:none;background:var(--card);border:1px solid #0db87a44;border-radius:10px;padding:16px 20px;margin-bottom:14px">
+          <div style="display:flex;gap:14px;align-items:center">
+            <div style="font-size:26px">📊</div>
+            <div style="flex:1">
+              <div style="color:var(--green);font-weight:700;font-size:13px;margin-bottom:4px">Live in Google Sheets</div>
+              <div style="color:var(--ts);font-size:12px;line-height:1.7;margin-bottom:8px">All data is already in your Google Sheet. Your team can open it directly to view, filter, or export at any time.</div>
+              <a href="https://sheets.google.com" target="_blank" style="display:inline-block;background:var(--card);color:var(--green);border:1px solid #0db87a55;border-radius:6px;padding:6px 14px;font-size:12px;font-weight:600;text-decoration:none">Open Google Sheets →</a>
+            </div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
+          <div style="background:var(--card);border:1px solid var(--bord);border-radius:10px;padding:16px 18px">
+            <div style="color:var(--cyan);font-weight:700;margin-bottom:4px;font-size:13px">⬇ Patients CSV</div>
+            <div style="color:var(--ts);font-size:12px;margin-bottom:10px;line-height:1.6">All demographics, anatomy, procedure and perioperative outcomes. One row per patient.</div>
+            <button class="btn btn-primary" onclick="exportPatientsCSV()">Download CSV</button>
+          </div>
+          <div style="background:var(--card);border:1px solid var(--bord);border-radius:10px;padding:16px 18px">
+            <div style="color:var(--cyan);font-weight:700;margin-bottom:4px;font-size:13px">⬇ Follow-Up CSV</div>
+            <div style="color:var(--ts);font-size:12px;margin-bottom:10px;line-height:1.6">All surveillance visits linked by Case ID. ESVS 2024 protocol fields. One row per visit.</div>
+            <button class="btn btn-primary" onclick="exportFollowupCSV()">Download CSV</button>
+          </div>
+          <div style="background:var(--card);border:1px solid var(--bord);border-radius:10px;padding:16px 18px">
+            <div style="color:var(--cyan);font-weight:700;margin-bottom:4px;font-size:13px">⬇ Full JSON Backup</div>
+            <div style="color:var(--ts);font-size:12px;margin-bottom:10px;line-height:1.6">Complete registry including nested follow-ups. Restore on another computer or import into R/SPSS.</div>
+            <button class="btn btn-primary" onclick="exportJSON()">Download JSON</button>
+          </div>
+          <div style="background:var(--card);border:1px solid var(--bord);border-radius:10px;padding:16px 18px">
+            <div style="color:var(--amber);font-weight:700;margin-bottom:4px;font-size:13px">⬆ Import JSON Backup</div>
+            <div style="color:var(--ts);font-size:12px;margin-bottom:10px;line-height:1.6">Restore from a previous JSON backup. <strong style="color:var(--red)">Warning:</strong> replaces all current data.</div>
+            <input type="file" id="importFile" accept=".json" style="display:none" onchange="importJSON(this)">
+            <button class="btn btn-amber btn-secondary" onclick="document.getElementById('importFile').click()">Import JSON</button>
+          </div>
+        </div>
+        <div style="background:var(--card);border:1px solid var(--bord);border-radius:8px;padding:14px 16px;font-size:12px;color:var(--ts);line-height:1.7">
+          <strong style="color:var(--cyan)">Guideline compliance:</strong> SVS 2020 (Oderich et al., JVS 2020;73:4S–35S) · ESVS 2024 CPG AAA (EJVES 2024;67:192–331) · ESVS 2026 CPG DTA/TAAA (EJVES 2026) · VASCUNET Core Dataset (2024).
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"><span id="toastMsg"></span><button class="t-close" onclick="hideToast()">×</button></div>
+
+<script>
+// ─── DATA ─────────────────────────────────────────────────────────────────────
+var DEMO=[
+  {id:"SAC-001",procedureDate:"2025-01-15",hn:"SIR-00001",age:"72",sex:"M",bmi:"25.2",asa:"III",htn:"Y",dm:"Y",dyslipaemia:"Y",smoking:"Ex-smoker",packYears:"25",cad:"Y",copd:"N",ckd:"3a",egfr:"52",pvd:"N",cvd:"N",frailtyTool:"mFI-5",frailtyScore:"2",frailtyGrade:"Intermediate",presentation:"Elective",diagnosis:"TAAA",extent:"Crawford II",maxDiam:"68",proxNeck:"6",neckAngle:"35",neckCalc:"2",ifu:"Out-of-IFU (anatomy)",sdm:"Y",procType:"FEVAR+BEVAR",deviceStrategy:"CMD (Custom-Made Device)",brand:"COOK Medical",model:"Zenith t-Branch CMD",proxDiam:"34",proxSeal:"22",fenestrations:"2",branches:"2",celiac:"Y",sma:"Y",lRenal:"Y",rRenal:"Y",lSubcl:"N",ana:"GA",csfDrain:"Y",spinal:"MEP+SSEP",mapTarget:"85",staged:"N",orTime:"265",fluoro:"88",contrast:"130",ebl:"700",ptSuccess:"Y",tvSuccess:"100% (4/4)",intraopEL:"None",sci:"N",sciGrade:"N/A",sciPerm:"N",sciOnset:"N/A",stroke:"N",aki:"Y",akiStage:"Stage 1",rrt:"N",bowel:"N",mi:"N",icu:"2",hospital:"8",mort30d:"N",cause30d:"",mae:"N",celiacP:"Patent",smaP:"Patent",lRenalP:"Patent",rRenalP:"Patent",tvi:"N",tviType:"N/A",followups:[{date:"2025-02-15",days:"31",modality:"CTA",maxSac:"65",sacDelta:"-3",sacTrend:"Shrinking",endoleak:"None",integrity:"Intact",tvi:"N",reinterv:"N",vital:"Alive"}]},
+  {id:"SAC-002",procedureDate:"2025-02-03",hn:"SIR-00002",age:"67",sex:"F",bmi:"22.8",asa:"III",htn:"Y",dm:"N",dyslipaemia:"Y",smoking:"Never",packYears:"0",cad:"N",copd:"N",ckd:"2",egfr:"72",pvd:"Y",cvd:"N",frailtyTool:"mFI-5",frailtyScore:"1",frailtyGrade:"Low",presentation:"Elective",diagnosis:"Pararenal AAA",extent:"Pararenal",maxDiam:"58",proxNeck:"4",neckAngle:"22",neckCalc:"1",ifu:"Out-of-IFU (anatomy)",sdm:"Y",procType:"FEVAR",deviceStrategy:"CMD (Custom-Made Device)",brand:"COOK Medical",model:"Zenith Fenestrated CMD",proxDiam:"28",proxSeal:"20",fenestrations:"3",branches:"0",celiac:"N",sma:"Y",lRenal:"Y",rRenal:"Y",lSubcl:"N",ana:"GA",csfDrain:"N",spinal:"None",mapTarget:"80",staged:"N",orTime:"195",fluoro:"65",contrast:"95",ebl:"400",ptSuccess:"Y",tvSuccess:"100% (3/3)",intraopEL:"None",sci:"N",sciGrade:"N/A",sciPerm:"N",sciOnset:"N/A",stroke:"N",aki:"Y",akiStage:"Stage 2",rrt:"N",bowel:"N",mi:"N",icu:"1",hospital:"6",mort30d:"N",cause30d:"",mae:"N",celiacP:"Not incorporated",smaP:"Patent",lRenalP:"Patent",rRenalP:"Patent",tvi:"N",tviType:"N/A",followups:[{date:"2025-03-03",days:"28",modality:"CTA",maxSac:"56",sacDelta:"-2",sacTrend:"Shrinking",endoleak:"None",integrity:"Intact",tvi:"N",reinterv:"N",vital:"Alive"},{date:"2025-08-04",days:"182",modality:"CTA",maxSac:"50",sacDelta:"-8",sacTrend:"Shrinking",endoleak:"None",integrity:"Intact",tvi:"N",reinterv:"N",vital:"Alive"}]},
+  {id:"SAC-003",procedureDate:"2025-03-12",hn:"SIR-00003",age:"78",sex:"M",bmi:"27.4",asa:"IV",htn:"Y",dm:"Y",dyslipaemia:"N",smoking:"Current",packYears:"45",cad:"Y",copd:"Y",ckd:"3b",egfr:"38",pvd:"Y",cvd:"Y",frailtyTool:"mFI-5",frailtyScore:"3",frailtyGrade:"High",presentation:"Urgent (within 7 days)",diagnosis:"TAAA",extent:"Crawford III",maxDiam:"72",proxNeck:"8",neckAngle:"28",neckCalc:"3",ifu:"Out-of-IFU (anatomy)",sdm:"Y",procType:"PMEG (Physician-Modified)",deviceStrategy:"PMEG (Physician-Modified)",brand:"COOK/Gore",model:"PMEG t-Branch",proxDiam:"38",proxSeal:"15",fenestrations:"2",branches:"2",celiac:"Y",sma:"Y",lRenal:"Y",rRenal:"Y",lSubcl:"Y",ana:"GA",csfDrain:"Y",spinal:"MEP+SSEP",mapTarget:"85",staged:"Y",orTime:"310",fluoro:"105",contrast:"160",ebl:"1200",ptSuccess:"Y",tvSuccess:"100% (4/4)",intraopEL:"Type IIa",sci:"Y",sciGrade:"2 - Move, cannot bear weight",sciPerm:"N",sciOnset:"Delayed",stroke:"N",aki:"Y",akiStage:"Stage 2",rrt:"N",bowel:"N",mi:"N",icu:"5",hospital:"18",mort30d:"N",cause30d:"",mae:"Y",celiacP:"Patent",smaP:"Patent",lRenalP:"Patent",rRenalP:"Patent",tvi:"N",tviType:"N/A",followups:[{date:"2025-04-12",days:"31",modality:"CTA",maxSac:"70",sacDelta:"-2",sacTrend:"Stable",endoleak:"Type IIa",integrity:"Intact",tvi:"N",reinterv:"N",vital:"Alive"}]},
+  {id:"SAC-004",procedureDate:"2025-04-20",hn:"SIR-00004",age:"65",sex:"M",bmi:"29.1",asa:"II",htn:"Y",dm:"N",dyslipaemia:"Y",smoking:"Ex-smoker",packYears:"15",cad:"N",copd:"N",ckd:"1",egfr:"88",pvd:"N",cvd:"N",frailtyTool:"mFI-5",frailtyScore:"0",frailtyGrade:"Low",presentation:"Elective",diagnosis:"Juxtarenal AAA",extent:"Juxtarenal",maxDiam:"55",proxNeck:"3",neckAngle:"15",neckCalc:"1",ifu:"Out-of-IFU (anatomy)",sdm:"Y",procType:"FEVAR",deviceStrategy:"OTS (Off-the-Shelf)",brand:"COOK Medical",model:"Zenith Fenestrated OTS",proxDiam:"30",proxSeal:"20",fenestrations:"2",branches:"0",celiac:"N",sma:"N",lRenal:"Y",rRenal:"Y",lSubcl:"N",ana:"GA",csfDrain:"N",spinal:"None",mapTarget:"75",staged:"N",orTime:"175",fluoro:"58",contrast:"85",ebl:"350",ptSuccess:"Y",tvSuccess:"100% (2/2)",intraopEL:"None",sci:"N",sciGrade:"N/A",sciPerm:"N",sciOnset:"N/A",stroke:"N",aki:"N",akiStage:"N/A",rrt:"N",bowel:"N",mi:"N",icu:"1",hospital:"4",mort30d:"N",cause30d:"",mae:"N",celiacP:"Not incorporated",smaP:"Not incorporated",lRenalP:"Patent",rRenalP:"Patent",tvi:"N",tviType:"N/A",followups:[{date:"2025-05-20",days:"30",modality:"CTA",maxSac:"52",sacDelta:"-3",sacTrend:"Shrinking",endoleak:"None",integrity:"Intact",tvi:"N",reinterv:"N",vital:"Alive"}]},
+  {id:"SAC-005",procedureDate:"2025-05-08",hn:"SIR-00005",age:"70",sex:"F",bmi:"23.5",asa:"IV",htn:"Y",dm:"Y",dyslipaemia:"Y",smoking:"Never",packYears:"0",cad:"Y",copd:"Y",ckd:"3a",egfr:"55",pvd:"Y",cvd:"Y",frailtyTool:"mFI-5",frailtyScore:"4",frailtyGrade:"High",presentation:"Emergency (within 24h)",diagnosis:"TAAA",extent:"Crawford IV",maxDiam:"82",proxNeck:"5",neckAngle:"42",neckCalc:"3",ifu:"Out-of-IFU (anatomy)",sdm:"Y",procType:"BEVAR",deviceStrategy:"OTS (Off-the-Shelf)",brand:"COOK Medical",model:"Zenith t-Branch OTS",proxDiam:"36",proxSeal:"18",fenestrations:"0",branches:"4",celiac:"Y",sma:"Y",lRenal:"Y",rRenal:"Y",lSubcl:"N",ana:"GA",csfDrain:"Y",spinal:"MEP+SSEP",mapTarget:"90",staged:"N",orTime:"285",fluoro:"95",contrast:"145",ebl:"950",ptSuccess:"Y",tvSuccess:"75% (3/4)",intraopEL:"Type Ia",sci:"Y",sciGrade:"1 - Non-functional movement",sciPerm:"Y",sciOnset:"Immediate",stroke:"N",aki:"Y",akiStage:"Stage 3",rrt:"Y",bowel:"N",mi:"Y",icu:"12",hospital:"28",mort30d:"N",cause30d:"",mae:"Y",celiacP:"Patent",smaP:"Patent",lRenalP:"Patent",rRenalP:"Occluded",tvi:"Y",tviType:"Branch occlusion",followups:[{date:"2025-06-08",days:"31",modality:"CTA",maxSac:"78",sacDelta:"-4",sacTrend:"Stable",endoleak:"Type Ia",integrity:"Intact",tvi:"Y",reinterv:"Y",vital:"Alive"}]},
+];
+
+// ─── STATE ─────────────────────────────────────────────────────────────────────
+var patients=[], apiUrl='', isDemo=false, sortKey='procedureDate', sortDir=-1, currentTab=0, editingId=null, fuCount=0;
+var PAL=['#1a6fd4','#08c8d0','#0db87a','#f09030','#e03030','#7c50d8','#e06018','#ec4899'];
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+window.onload=function(){
+  var saved=localStorage.getItem('evar-url-v5');
+  var type=localStorage.getItem('evar-type-v5')||'sheets';
+  if(saved){
+    apiUrl=saved;backendType=type;
+    if(type==='jsonbin'||saved==='JSONBIN'){
+      jbKey=localStorage.getItem('evar-jbkey-v1')||'';
+      jbBin=localStorage.getItem('evar-jbbin-v1')||'';
+      backendType='jsonbin';apiUrl='JSONBIN';
+    }
+    showApp();loadData();
+  } else{showSetup();}
+};
+var backendType=''; // 'jsonbin' or 'sheets'
+var jbKey='', jbBin='';
+function showSetup(){document.getElementById('setup').style.display='flex';document.getElementById('app').style.display='none';}
+function showApp(){document.getElementById('setup').style.display='none';document.getElementById('app').style.display='flex';}
+function resetSetup(){
+  localStorage.removeItem('evar-url-v5');localStorage.removeItem('evar-type-v5');
+  localStorage.removeItem('evar-jbkey-v1');localStorage.removeItem('evar-jbbin-v1');
+  apiUrl='';isDemo=false;backendType='';jbKey='';jbBin='';
+  showSetup();
+}
+function startDemo(){
+  isDemo=true;apiUrl='DEMO';backendType='demo';
+  patients=JSON.parse(JSON.stringify(DEMO));
+  showApp();setConn('ok','Demo mode');
+  document.getElementById('demoBar').style.display='block';
+  document.getElementById('changeUrl').textContent='Connect cloud storage';
+  renderAll();
+}
+function showSection(s){
+  document.getElementById('sec-jsonbin').style.display=s==='jsonbin'?'block':'none';
+  document.getElementById('sec-gsheets').style.display=s==='gsheets'?'block':'none';
+}
+async function connectJSONBin(){
+  var k=document.getElementById('jb-key').value.trim();
+  var b=document.getElementById('jb-bin').value.trim();
+  var res=document.getElementById('jb-result');
+  if(!k){res.innerHTML='<div class="conn-result conn-err">Please paste your API Key.</div>';return;}
+  if(!b){res.innerHTML='<div class="conn-result conn-err">Please paste your Bin ID.</div>';return;}
+  res.innerHTML='<div class="conn-result" style="background:#1a6fd422;border:1px solid #1a6fd455;color:#7a90b0">Testing connection...</div>';
+  try{
+    var r=await fetch('https://api.jsonbin.io/v3/b/'+b+'/latest',{headers:{'X-Master-Key':k,'X-Bin-Meta':'false'}});
+    if(r.status===401||r.status===403)throw new Error('Invalid API key. Make sure you copied it correctly from JSONBin > API Keys.');
+    if(r.status===404)throw new Error('Bin ID not found. Make sure you copied the ID from the URL after /b/');
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    var d=await r.json();
+    jbKey=k;jbBin=b;backendType='jsonbin';
+    localStorage.setItem('evar-type-v5','jsonbin');
+    localStorage.setItem('evar-jbkey-v1',k);
+    localStorage.setItem('evar-jbbin-v1',b);
+    localStorage.setItem('evar-url-v5','JSONBIN');
+    apiUrl='JSONBIN';
+    // If bin has data load it, otherwise start fresh
+    if(Array.isArray(d.record)){patients=d.record;}
+    else if(Array.isArray(d)){patients=d;}
+    else patients=[];
+    res.innerHTML='<div class="conn-result conn-ok">Connected! '+patients.length+' cases loaded.</div>';
+    setTimeout(function(){showApp();setConn("ok","JSONBin connected");renderAll();document.getElementById("demoBar").style.display="none";document.getElementById("changeUrl").textContent="Change storage";},800);
+  }catch(err){
+    res.innerHTML='<div class="conn-result conn-err">'+err.message+'</div>';
+  }
+}
+async function connectSheets(){
+  var u=document.getElementById('gs-url').value.trim();
+  var res=document.getElementById('gs-result');
+  if(!u){res.innerHTML='<div class="conn-result conn-err">Please paste your Web App URL.</div>';return;}
+  if(!u.includes('script.google.com')){res.innerHTML='<div class="conn-result conn-err">URL must start with https://script.google.com...</div>';return;}
+  res.innerHTML='<div class="conn-result" style="background:#1a6fd422;border:1px solid #1a6fd455;color:#7a90b0">Testing connection...</div>';
+  try{
+    var data=await sheetsApiGet(u,'ping');
+    var info=data.data||data;
+    backendType='sheets';apiUrl=u;
+    localStorage.setItem('evar-type-v5','sheets');
+    localStorage.setItem('evar-url-v5',u);
+    res.innerHTML='<div class="conn-result conn-ok">Connected! Sheet: '+(info.sheet||'EVAR_Registry')+'</div>';
+    setTimeout(function(){showApp();loadData();},700);
+  }catch(err){
+    res.innerHTML='<div class="conn-result conn-err">'+err.message+'. Make sure "Who has access" is set to Anyone and you used the /exec URL.</div>';
+  }
+}
+
+// ─── BACKEND API ─────────────────────────────────────────────────────────────
+// JSONBin.io API
+async function jsonbinGet(){
+  var r=await fetch('https://api.jsonbin.io/v3/b/'+jbBin+'/latest',{headers:{'X-Master-Key':jbKey,'X-Bin-Meta':'false'}});
+  if(!r.ok)throw new Error('JSONBin read error: HTTP '+r.status);
+  var d=await r.json();
+  return Array.isArray(d.record)?d.record:Array.isArray(d)?d:[];
+}
+async function jsonbinPut(data){
+  var r=await fetch('https://api.jsonbin.io/v3/b/'+jbBin,{
+    method:'PUT',
+    headers:{'Content-Type':'application/json','X-Master-Key':jbKey},
+    body:JSON.stringify(data)
+  });
+  if(!r.ok)throw new Error('JSONBin write error: HTTP '+r.status);
+  return await r.json();
+}
+// Google Sheets API
+async function sheetsApiGet(url,action,params){
+  var u=new URL(url);
+  u.searchParams.set('action',action);
+  if(params){for(var k in params)u.searchParams.set(k,typeof params[k]==='object'?JSON.stringify(params[k]):String(params[k]));}
+  var r=await fetch(u.toString(),{redirect:'follow'});
+  if(!r.ok)throw new Error('HTTP '+r.status);
+  var d=await r.json();
+  if(!d.success)throw new Error(d.error||'API error');
+  return d.data!==undefined?d.data:d;
+}
+async function loadData(){
+  if(isDemo)return;
+  showLoading(true);
+  try{
+    if(backendType==='jsonbin'||apiUrl==='JSONBIN'){
+      patients=await jsonbinGet();
+      try{localStorage.setItem('evar-cache-v5',JSON.stringify(patients));}catch(e){}
+      setConn('ok','JSONBin synced '+new Date().toLocaleTimeString());
+    } else {
+      var d=await sheetsApiGet(apiUrl,'getAll');
+      var resp=d.patients!==undefined?d:{};
+      patients=(resp.patients||[]);
+      try{localStorage.setItem('evar-cache-v5',JSON.stringify(patients));}catch(e){}
+      setConn('ok','Sheets synced '+new Date().toLocaleTimeString());
+    }
+    renderAll();
+  }catch(err){
+    setConn('error','');
+    var c=localStorage.getItem('evar-cache-v5');
+    if(c){patients=JSON.parse(c);renderAll();showToast('Offline — showing cached data. '+err.message,'error');}
+    else showToast('Cannot connect: '+err.message,'error');
+  }
+  showLoading(false);
+}
+function setConn(state,label){
+  var dot=document.getElementById('connDot');
+  dot.style.background=state==='ok'?'var(--green)':state==='error'?'var(--red)':'var(--amber)';
+  document.getElementById('connLabel').textContent=isDemo?'Demo mode':(state==='ok'?'Connected':state==='error'?'Error':'Connecting…');
+  document.getElementById('syncTime').textContent=label||'';
+}
+function showLoading(v){document.getElementById('loadingOverlay').style.display=v?'flex':'none';}
+
+// ─── SAVE / DELETE ────────────────────────────────────────────────────────────
+async function savePatient(pt){
+  var i=patients.findIndex(function(p){return p.id===pt.id;});
+  if(isDemo||backendType==='demo'){if(i>=0)patients[i]=pt;else patients.push(pt);return;}
+  if(backendType==='jsonbin'||apiUrl==='JSONBIN'){
+    if(i>=0)patients[i]=pt;else patients.push(pt);
+    await jsonbinPut(patients);
+    try{localStorage.setItem('evar-cache-v5',JSON.stringify(patients));}catch(e){}
+    return;
+  }
+  await sheetsApiGet(apiUrl,'upsert',{data:pt});
+  if(i>=0)patients[i]=pt;else patients.push(pt);
+  try{localStorage.setItem('evar-cache-v5',JSON.stringify(patients));}catch(e){}
+}
+async function deletePatient(id){
+  var label=isDemo||backendType==='demo'?' (demo)':backendType==='jsonbin'?' from JSONBin':' from Google Sheets';
+  if(!confirm('Delete '+id+label+'? This cannot be undone.'))return;
+  patients=patients.filter(function(p){return p.id!==id;});
+  if(!isDemo&&backendType!=='demo'){
+    if(backendType==='jsonbin'||apiUrl==='JSONBIN'){
+      await jsonbinPut(patients);
+    } else {
+      await sheetsApiGet(apiUrl,'delete',{id:id});
+    }
+    try{localStorage.setItem('evar-cache-v5',JSON.stringify(patients));}catch(e){}
+  }
+  renderAll();
+  showToast('Deleted '+id,'success');
+}
+
+// ─── HELPERS ──────────────────────────────────────────────────────────────────
+function pct(n,d){return d>0?((n/d)*100).toFixed(1)+'%':'—';}
+function avg(arr){var v=arr.filter(function(x){return x&&!isNaN(+x);});return v.length?(v.reduce(function(s,x){return s+(+x);},0)/v.length).toFixed(1):'—';}
+function cnt(arr,k,v){return arr.filter(function(p){return p[k]===v;}).length;}
+function today(){return new Date().toISOString().slice(0,10);}
+function newId(){var ns=patients.map(function(p){return parseInt((p.id||'SAC-000').split('-')[1]||0);});return 'SAC-'+String(Math.max.apply(null,[0].concat(ns))+1).padStart(3,'0');}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function dl(content,filename,type){
+  type=type||'text/csv;charset=utf-8;';
+  var u=URL.createObjectURL(new Blob(['\uFEFF'+content],{type:type}));
+  var a=document.createElement('a');a.href=u;a.download=filename;
+  document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(u);
+}
+function tagClass(pt){var ds=pt.deviceStrategy||'';if(ds.startsWith('PMEG'))return'tag-purple';if(ds.startsWith('CMD'))return'tag-cyan';return'tag-green';}
+function renderAll(){
+  document.getElementById('caseCount').textContent=patients.length+' cases';
+  renderDashboard();renderList();renderExport();
+}
+
+// ─── DASHBOARD ────────────────────────────────────────────────────────────────
+function renderDashboard(){
+  var n=patients.length,ts=cnt(patients,'ptSuccess','Y'),mort=cnt(patients,'mort30d','Y');
+  var sci=cnt(patients,'sci','Y'),sciP=cnt(patients,'sciPerm','Y');
+  var mae=cnt(patients,'mae','Y'),rrt=cnt(patients,'rrt','Y');
+  var kpis=[
+    {label:'Total Cases',val:n,sub:'All procedures',color:'var(--blue)'},
+    {label:'Primary Tech. Success',val:n?pct(ts,n):'—',sub:ts+'/'+n+' cases',color:'var(--green)'},
+    {label:'30-Day Mortality',val:n?pct(mort,n):'—',sub:mort+' events',color:mort?'var(--red)':'var(--green)'},
+    {label:'SCI Rate',val:n?pct(sci,n):'—',sub:'Permanent: '+sciP,color:sci?'var(--red)':'var(--green)'},
+    {label:'MAE Composite',val:n?pct(mae,n):'—',sub:mae+' events',color:mae?'var(--amber)':'var(--green)'},
+    {label:'Avg OR Time',val:avg(patients.map(function(p){return p.orTime;})),sub:'min',color:'var(--cyan)'},
+    {label:'Avg Hospital',val:avg(patients.map(function(p){return p.hospital;})),sub:'days',color:'var(--purple)'},
+    {label:'Avg Max Diam.',val:avg(patients.map(function(p){return p.maxDiam;})),sub:'mm',color:'var(--amber)'},
+  ];
+  document.getElementById('kpiRow').innerHTML=kpis.map(function(k){
+    return '<div class="kpi" style="border-top:3px solid '+k.color+'"><div class="kpi-label">'+k.label+'</div><div class="kpi-val" style="color:'+k.color+'">'+k.val+'</div>'+(k.sub?'<div class="kpi-sub">'+k.sub+'</div>':'')+'</div>';
+  }).join('');
+  var procMap={};
+  patients.forEach(function(p){var k=(p.procType||'Other').replace(' (Physician-Modified)','').replace(' (Off-the-Shelf)','');procMap[k]=(procMap[k]||0)+1;});
+  var procData=Object.keys(procMap).map(function(name,i){return{name:name,value:procMap[name],color:PAL[i%PAL.length]};}).sort(function(a,b){return b.value-a.value;});
+  var urgData=[
+    {name:'Elective',value:cnt(patients,'presentation','Elective'),color:'var(--green)'},
+    {name:'Urgent',value:cnt(patients,'presentation','Urgent (within 7 days)'),color:'var(--amber)'},
+    {name:'Emergency',value:cnt(patients,'presentation','Emergency (within 24h)'),color:'var(--red)'},
+  ].filter(function(d){return d.value>0;});
+  var combData=[{name:'HTN',k:'htn'},{name:'DM',k:'dm'},{name:'CAD',k:'cad'},{name:'COPD',k:'copd'},{name:'PVD',k:'pvd'},{name:'CVD',k:'cvd'},{name:'Dyslipid.',k:'dyslipaemia'}]
+    .map(function(d,i){return{name:d.name,value:n?Math.round(cnt(patients,d.k,'Y')/n*100):0,color:PAL[i%PAL.length]};});
+  var outData=[
+    {name:'Tech OK',value:ts,color:'var(--green)'},{name:'MAE',value:mae,color:'var(--amber)'},
+    {name:'SCI',value:sci,color:'#e06018'},{name:'SCI perm',value:sciP,color:'var(--red)'},
+    {name:'AKI',value:cnt(patients,'aki','Y'),color:'#60a5fa'},{name:'RRT',value:rrt,color:'var(--purple)'},
+    {name:'Mort',value:mort,color:'var(--red)'},
+  ];
+  var maxP=Math.max.apply(null,procData.map(function(d){return d.value;}).concat([1]));
+  var maxO=Math.max.apply(null,outData.map(function(d){return d.value;}).concat([1]));
+  var maxC=Math.max.apply(null,combData.map(function(d){return d.value;}).concat([1]));
+  document.getElementById('charts').innerHTML=
+    '<div class="chart-card"><div class="chart-title">Procedure Type Distribution</div>'
+    +(procData.length?procData.map(function(d){return '<div class="hbar-row"><div class="hbar-label">'+esc(d.name)+'</div><div class="hbar-track"><div class="hbar-fill" style="width:'+Math.round(d.value/maxP*100)+'%;background:'+d.color+'"></div></div><div class="hbar-val">'+d.value+'</div></div>';}).join(''):'<div class="no-data">Add cases to see data</div>')
+    +'</div>'
+    +'<div class="chart-card"><div class="chart-title">Presentation Urgency</div><div class="donut-wrap">'+donutSVG(urgData,180)+'<div class="donut-legend">'+urgData.map(function(d){return '<div class="donut-leg-item"><div class="donut-leg-dot" style="background:'+d.color+'"></div>'+esc(d.name)+': '+d.value+'</div>';}).join('')+'</div></div></div>'
+    +'<div class="chart-card"><div class="chart-title">Comorbidity Prevalence (%)</div><div class="vbar-wrap">'+combData.map(function(d){return '<div class="vbar-col"><div class="vbar-num">'+d.value+'%</div><div class="vbar-bar" style="height:'+Math.round(d.value/maxC*100)+'%;background:'+d.color+'"></div><div class="vbar-lbl">'+esc(d.name)+'</div></div>';}).join('')+'</div></div>'
+    +'<div class="chart-card"><div class="chart-title">Perioperative Outcomes (N events)</div><div class="vbar-wrap">'+outData.map(function(d){return '<div class="vbar-col"><div class="vbar-num">'+d.value+'</div><div class="vbar-bar" style="height:'+Math.round(d.value/maxO*100)+'%;background:'+d.color+'"></div><div class="vbar-lbl">'+esc(d.name)+'</div></div>';}).join('')+'</div></div>';
+  var recent=[].concat(patients).sort(function(a,b){return b.procedureDate.localeCompare(a.procedureDate);}).slice(0,6);
+  document.getElementById('recentBody').innerHTML=recent.map(function(p){
+    return '<tr class="pt-row" data-id="'+esc(p.id)+'" style="cursor:pointer">'
+      +'<td class="mono">'+esc(p.id)+'</td>'
+      +'<td style="color:var(--ts);white-space:nowrap">'+esc(p.procedureDate)+'</td>'
+      +'<td>'+esc(p.diagnosis)+'</td>'
+      +'<td><span class="tag tag-blue">'+esc((p.procType||'').split(' ')[0])+'</span></td>'
+      +'<td><span class="tag '+tagClass(p)+'">'+esc((p.deviceStrategy||'').split(' ')[0])+'</span></td>'
+      +'<td style="text-align:center;color:'+(p.ptSuccess==='Y'?'var(--green)':'var(--red)')+';font-weight:800">'+(p.ptSuccess==='Y'?'&#10003;':'&#10007;')+'</td>'
+      +'<td style="text-align:center" class="'+(p.sci==='Y'?'dot-r':'dot-g')+'">&#9679;</td>'
+      +'<td style="text-align:center" class="'+(p.mae==='Y'?'dot-a':'dot-g')+'">&#9679;</td>'
+      +'<td style="text-align:center" class="'+(p.mort30d==='Y'?'dot-r':'dot-g')+'">&#9679;</td>'
+      +'</tr>';
+  }).join('')||'<tr><td colspan="9" style="text-align:center;color:var(--tm);padding:24px">No cases yet</td></tr>';
+}
+function donutSVG(data,size){
+  var total=data.reduce(function(s,d){return s+d.value;},0);
+  if(!total)return '<svg width="'+size+'" height="'+size+'"><text x="50%" y="50%" text-anchor="middle" dominant-baseline="middle" fill="var(--tm)" font-size="13">No data</text></svg>';
+  var cx=size/2,cy=size/2,R=size*.38,r=size*.22,ang=-Math.PI/2,paths='';
+  data.forEach(function(d){
+    var a=d.value/total*Math.PI*2;
+    var x1=cx+R*Math.cos(ang),y1=cy+R*Math.sin(ang);
+    var x2=cx+R*Math.cos(ang+a),y2=cy+R*Math.sin(ang+a);
+    var xi1=cx+r*Math.cos(ang),yi1=cy+r*Math.sin(ang);
+    var xi2=cx+r*Math.cos(ang+a),yi2=cy+r*Math.sin(ang+a);
+    paths+='<path d="M'+x1+' '+y1+' A'+R+' '+R+' 0 '+(a>Math.PI?1:0)+' 1 '+x2+' '+y2+' L'+xi2+' '+yi2+' A'+r+' '+r+' 0 '+(a>Math.PI?1:0)+' 0 '+xi1+' '+yi1+'Z" fill="'+d.color+'" stroke="#07101d" stroke-width="2"/>';
+    ang+=a;
+  });
+  return '<svg width="'+size+'" height="'+size+'">'+paths+'<text x="'+cx+'" y="'+cy+'" text-anchor="middle" dominant-baseline="middle" fill="#dde5f0" font-size="22" font-weight="bold">'+total+'</text></svg>';
+}
+
+// ─── LIST ─────────────────────────────────────────────────────────────────────
+function sortBy(k){if(sortKey===k){sortDir*=-1;}else{sortKey=k;sortDir=1;}renderList();}
+function renderList(){
+  var q=(document.getElementById('searchBox').value||'').toLowerCase();
+  var list=patients.filter(function(p){return[p.id,p.hn,p.diagnosis,p.procType].some(function(v){return(v||'').toLowerCase().includes(q);});});
+  list.sort(function(a,b){return(a[sortKey]||'').localeCompare(b[sortKey]||'')*sortDir;});
+  document.getElementById('listSub').textContent=patients.length+' cases';
+  document.getElementById('listBody').innerHTML=list.map(function(p,i){
+    return '<tr class="pt-row" data-id="'+esc(p.id)+'" style="cursor:pointer;background:'+(i%2?'var(--surf)':'transparent')+'">'
+      +'<td class="mono">'+esc(p.id)+'</td>'
+      +'<td style="color:var(--ts);white-space:nowrap">'+esc(p.procedureDate)+'</td>'
+      +'<td style="white-space:nowrap">'+(p.age||'?')+'y / '+(p.sex||'?')+'</td>'
+      +'<td>'+esc(p.diagnosis||'—')+'</td>'
+      +'<td><span class="tag tag-purple">'+esc(p.extent||'—')+'</span></td>'
+      +'<td><span class="tag tag-blue">'+esc((p.procType||'—').split(' ')[0])+'</span></td>'
+      +'<td><span class="tag '+tagClass(p)+'">'+esc((p.deviceStrategy||'—').split(' ')[0])+'</span></td>'
+      +'<td><span class="tag '+(p.ifu==='In-IFU'?'tag-green':'tag-amber')+'">'+esc((p.ifu||'—').replace('Out-of-IFU ','OOI '))+'</span></td>'
+      +'<td style="text-align:center;white-space:nowrap">'
+      +'<span style="color:'+(p.ptSuccess==='Y'?'var(--green)':'var(--red)')+';font-weight:800;margin-right:5px">'+(p.ptSuccess==='Y'?'&#10003;':'&#10007;')+'</span>'
+      +'<span class="'+(p.sci==='Y'?'dot-r':'dot-g')+'">&#9679;</span> '
+      +'<span class="'+(p.mae==='Y'?'dot-a':'dot-g')+'">&#9679;</span> '
+      +'<span class="'+(p.mort30d==='Y'?'dot-r':'dot-g')+'">&#9679;</span>'
+      +'</td>'
+      +'<td style="white-space:nowrap" class="action-cell">'
+      +'<button class="btn btn-cyan btn-small edit-btn" data-id="'+esc(p.id)+'" style="margin-right:4px">Edit</button>'
+      +'<button class="btn btn-danger btn-small del-btn" data-id="'+esc(p.id)+'">Del</button>'
+      +'</td>'
+      +'</tr>';
+  }).join('')||'<tr><td colspan="10" style="text-align:center;color:var(--tm);padding:28px">No matching records</td></tr>';
+}
+
+// ─── EVENT DELEGATION ─────────────────────────────────────────────────────────
+document.addEventListener('click',function(ev){
+  var editBtn=ev.target.closest('.edit-btn');
+  if(editBtn){ev.stopPropagation();openForm(editBtn.getAttribute('data-id'));return;}
+  var delBtn=ev.target.closest('.del-btn');
+  if(delBtn){ev.stopPropagation();deletePatient(delBtn.getAttribute('data-id'));return;}
+  var ptRow=ev.target.closest('.pt-row');
+  if(ptRow&&!ev.target.closest('.action-cell')){openForm(ptRow.getAttribute('data-id'));return;}
+});
+
+// ─── EXPORT ───────────────────────────────────────────────────────────────────
+function renderExport(){
+  var fuN=patients.reduce(function(s,p){return s+(p.followups||[]).length;},0);
+  document.getElementById('exportSub').textContent=patients.length+' patients · '+fuN+' follow-up visits';
+  document.getElementById('sheetsLink').style.display=(isDemo||backendType==='demo')?'none':'block';
+}
+function exportPatientsCSV(){
+  var ks=['id','procedureDate','hn','age','sex','bmi','asa','htn','dm','dyslipaemia','smoking','packYears','cad','copd','ckd','egfr','pvd','cvd','frailtyGrade','presentation','diagnosis','extent','maxDiam','proxNeck','ifu','procType','deviceStrategy','brand','model','fenestrations','branches','ana','csfDrain','spinal','orTime','fluoro','contrast','ebl','ptSuccess','tvSuccess','intraopEL','sci','sciGrade','sciPerm','stroke','aki','akiStage','rrt','bowel','mi','icu','hospital','mort30d','mae','celiacP','smaP','lRenalP','rRenalP','tvi','tviType'];
+  var csv=[ks.join(',')].concat(patients.map(function(p){return ks.map(function(k){return '"'+(p[k]||'').toString().replace(/"/g,'""')+'"';}).join(',');})).join('\n');
+  dl(csv,'EVAR_Patients_'+today()+'.csv');
+}
+function exportFollowupCSV(){
+  var ks=['patientId','visitNo','date','days','modality','maxSac','sacDelta','sacTrend','endoleak','integrity','tvi','reinterv','vital'];
+  var rows=[];
+  patients.forEach(function(p){(p.followups||[]).forEach(function(f,i){rows.push(ks.map(function(k){return '"'+(k==='patientId'?p.id:k==='visitNo'?String(i+1):(f[k]||'')).replace(/"/g,'""')+'"';}).join(','));});});
+  dl([ks.join(',')].concat(rows).join('\n'),'EVAR_FollowUp_'+today()+'.csv');
+}
+function exportJSON(){dl(JSON.stringify(patients,null,2),'EVAR_Backup_'+today()+'.json','application/json;charset=utf-8;');}
+function importJSON(input){
+  var f=input.files[0];if(!f)return;
+  var r=new FileReader();
+  r.onload=function(ev){
+    try{
+      var d=JSON.parse(ev.target.result);
+      if(!Array.isArray(d)||!d.length||!d[0].id){alert('Invalid format.');return;}
+      if(!confirm('Import '+d.length+' cases? This replaces all current data.'))return;
+      patients=d;renderAll();showToast('Imported '+d.length+' cases','success');
+    }catch(e){alert('Could not parse file: '+e.message);}
+  };
+  r.readAsText(f);input.value='';
+}
+
+// ─── FORM ─────────────────────────────────────────────────────────────────────
+var OPTS={
+  procType:['FEVAR','BEVAR','FEVAR+BEVAR','PMEG (Physician-Modified)','TEVAR','Ch-EVAR (Chimney/Snorkel)','Hybrid FEVAR','Hybrid BEVAR','Open Conversion','Other'],
+  device:['CMD (Custom-Made Device)','OTS (Off-the-Shelf)','PMEG (Physician-Modified)','Hybrid CMD/OTS'],
+  diag:['TAAA','Descending TAA','Aortic Arch Aneurysm','Pararenal AAA','Juxtarenal AAA','Suprarenal AAA','Type B Dissection (Chronic)','Type B Dissection (Acute)','PAU','IMH','Other'],
+  extent:['Crawford I','Crawford II','Crawford III','Crawford IV','Crawford V','Juxtarenal','Pararenal','Suprarenal','Arch','N/A'],
+  present:['Elective','Urgent (within 7 days)','Emergency (within 24h)'],
+  asa:['I','II','III','IV','V','VI'],sex:['M','F','Other'],
+  smoking:['Never','Ex-smoker','Current','Unknown'],
+  ckd:['1','2','3a','3b','4','5','5D (Dialysis)','N/A'],
+  frailtyT:['mFI-5','FRAIL Scale','Fried Criteria','CFS (1-9)','Not Done'],
+  frailtyG:['Low','Intermediate','High','Very High'],
+  ana:['GA','LA+Sedation','Regional','LA Only'],
+  ifu:['In-IFU','Out-of-IFU (anatomy)','Out-of-IFU (indication)','N/A'],
+  endoleak:['None','Type Ia (standard)','Type Ia (gutter)','Type Ib','Type Ic','Type IIa','Type IIb','Type IIIa','Type IIIb','Type IIId','Type IV','Type V','Indeterminate'],
+  sciG:['N/A','0 - Complete paraplegia','1 - Non-functional movement','2 - Move cannot bear weight','3 - Ambulate with assistance','4 - Normal gait minor deficit','5 - Normal function'],
+  sciO:['N/A','Immediate (24h or less)','Delayed (more than 24h)'],
+  aki:['N/A','Stage 1','Stage 2','Stage 3 or new RRT'],
+  vital:['Alive','Dead - Aortic-related','Dead - Non-aortic','Lost to Follow-Up','Unknown'],
+  sacT:['Shrinking more than 5mm','Shrinking less than 5mm','Stable','Expanding less than 5mm','Expanding more than 5mm'],
+  patency:['Patent','Stenosed','Occluded early','Occluded late','Not incorporated','Unknown'],
+  tviT:['N/A','Branch occlusion','Stenosis requiring reintervention','Component separation','Aneurysm-related rupture','Death branch-related'],
+  spinal:['None','MEP only','SSEP only','MEP+SSEP'],
+  integ:['Intact','Stent fracture','Migration more than 10mm','Limb thrombosis','Component separation','Kinking'],
+  img:['CTA arterial and venous','CTA arterial only','MRA','Duplex Ultrasound','Plain X-Ray','None'],
+  reintT:['N/A','Endovascular endoleak','Endovascular TVI','Endovascular other','Open surgical','Hybrid','Conversion to open'],
+  yn:['Y','N','Unknown'],yno:['Y','N'],
+};
+function mkSel(id,opts,val){var o='<option value="">— select —</option>'+opts.map(function(op){return'<option value="'+esc(op)+'"'+(op===val?' selected':'')+'>'+esc(op)+'</option>';}).join('');return'<select id="'+id+'">'+o+'</select>';}
+function mkInp(id,type,val){return'<input type="'+(type||'text')+'" id="'+id+'" value="'+esc(val||'')+'">';}
+function mkField(label,html,note){return'<div><label class="f-label">'+label+(note?'<span class="f-note">'+note+'</span>':'')+'</label>'+html+'</div>';}
+function mkGrid(cols,fields){return'<div class="grid g'+cols+'">'+fields.join('')+'</div>';}
+function mkSec(t){return'<div class="sec-hdr">'+t+'</div>';}
+var formTabs=[];
+function buildFormTabs(pt){
+  var p=pt||{};
+  formTabs=[
+    // Tab 0: Demographics
+    mkSec('Patient Identifiers (VASCUNET Core Dataset)')
+    +mkGrid(4,[
+      mkField('Case ID *',mkInp('f-id','text',p.id||newId())),
+      mkField('Procedure Date *',mkInp('f-procedureDate','date',p.procedureDate)),
+      mkField('Hospital Number (HN)',mkInp('f-hn','text',p.hn)),
+      mkField('Age (years)',mkInp('f-age','number',p.age)),
+      mkField('Sex',mkSel('f-sex',OPTS.sex,p.sex)),
+      mkField('BMI kg/m2',mkInp('f-bmi','number',p.bmi)),
+      mkField('ASA Class',mkSel('f-asa',OPTS.asa,p.asa)),
+    ])
+    +mkSec('Comorbidities (VASCUNET Core)')
+    +mkGrid(4,[
+      mkField('Hypertension',mkSel('f-htn',OPTS.yn,p.htn)),
+      mkField('Diabetes Mellitus',mkSel('f-dm',OPTS.yn,p.dm)),
+      mkField('Dyslipidaemia',mkSel('f-dyslipaemia',OPTS.yn,p.dyslipaemia)),
+      mkField('Smoking',mkSel('f-smoking',OPTS.smoking,p.smoking)),
+      mkField('Pack-Years',mkInp('f-packYears','number',p.packYears)),
+      mkField('CAD / IHD',mkSel('f-cad',OPTS.yn,p.cad)),
+      mkField('COPD',mkSel('f-copd',OPTS.yn,p.copd)),
+      mkField('Peripheral Vascular Disease',mkSel('f-pvd',OPTS.yn,p.pvd)),
+      mkField('CVD / Stroke',mkSel('f-cvd',OPTS.yn,p.cvd)),
+      mkField('CKD Stage (KDIGO)',mkSel('f-ckd',OPTS.ckd,p.ckd)),
+      mkField('eGFR mL/min/1.73m2',mkInp('f-egfr','number',p.egfr)),
+    ])
+    +mkSec('Frailty Assessment (ESVS 2024 / 2026 Recommended)')
+    +mkGrid(3,[
+      mkField('Frailty Tool',mkSel('f-frailtyTool',OPTS.frailtyT,p.frailtyTool)),
+      mkField('Frailty Score',mkInp('f-frailtyScore','text',p.frailtyScore)),
+      mkField('Frailty Grade',mkSel('f-frailtyGrade',OPTS.frailtyG,p.frailtyGrade)),
+    ]),
+    // Tab 1: Anatomy
+    mkSec('Clinical Indication and Presentation')
+    +mkGrid(3,[
+      mkField('Presentation Urgency *',mkSel('f-presentation',OPTS.present,p.presentation)),
+      mkField('Aortic Diagnosis *',mkSel('f-diagnosis',OPTS.diag,p.diagnosis)),
+      mkField('Crawford / Anatomical Extent',mkSel('f-extent',OPTS.extent,p.extent)),
+    ])
+    +mkSec('Aortic Morphology - SVS 2020 Mandatory Fields')
+    +mkGrid(4,[
+      mkField('Max Sac Diameter mm',mkInp('f-maxDiam','number',p.maxDiam)),
+      mkField('Prox Neck Length mm',mkInp('f-proxNeck','number',p.proxNeck)),
+      mkField('Prox Neck Angle degrees',mkInp('f-neckAngle','number',p.neckAngle)),
+      mkField('Neck Calcification 0-3',mkSel('f-neckCalc',['0','1','2','3'],p.neckCalc)),
+    ])
+    +mkSec('IFU Compliance and Decision-Making (ESVS 2024)')
+    +mkGrid(3,[
+      mkField('IFU Compliance',mkSel('f-ifu',OPTS.ifu,p.ifu)),
+      mkField('Shared Decision-Making Documented',mkSel('f-sdm',OPTS.yno,p.sdm)),
+    ]),
+    // Tab 2: Procedure
+    mkSec('Procedure Type and Device Strategy (SVS 2020)')
+    +mkGrid(3,[
+      mkField('Procedure Type *',mkSel('f-procType',OPTS.procType,p.procType)),
+      mkField('Device Strategy *',mkSel('f-deviceStrategy',OPTS.device,p.deviceStrategy)),
+      mkField('Anaesthesia',mkSel('f-ana',OPTS.ana,p.ana)),
+      mkField('Brand',mkInp('f-brand','text',p.brand)),
+      mkField('Model',mkInp('f-model','text',p.model)),
+      mkField('Proximal Diameter mm',mkInp('f-proxDiam','number',p.proxDiam)),
+      mkField('Proximal Sealing Zone mm',mkInp('f-proxSeal','number',p.proxSeal),'SVS min 15mm'),
+      mkField('No. Fenestrations',mkInp('f-fenestrations','number',p.fenestrations)),
+      mkField('No. Branches',mkInp('f-branches','number',p.branches)),
+    ])
+    +mkSec('Target Vessel Incorporation - SVS 2020 Per Vessel')
+    +mkGrid(5,[
+      mkField('Celiac Artery',mkSel('f-celiac',OPTS.yno,p.celiac)),
+      mkField('SMA',mkSel('f-sma',OPTS.yno,p.sma)),
+      mkField('Left Renal',mkSel('f-lRenal',OPTS.yno,p.lRenal)),
+      mkField('Right Renal',mkSel('f-rRenal',OPTS.yno,p.rRenal)),
+      mkField('L Subclavian / LSA',mkSel('f-lSubcl',OPTS.yno,p.lSubcl)),
+    ])
+    +mkSec('SCI and Organ Protection - ESVS 2026')
+    +mkGrid(4,[
+      mkField('CSF Drain',mkSel('f-csfDrain',OPTS.yno,p.csfDrain)),
+      mkField('Spinal Cord Monitoring',mkSel('f-spinal',OPTS.spinal,p.spinal)),
+      mkField('MAP Target Intraop mmHg',mkInp('f-mapTarget','number',p.mapTarget)),
+      mkField('Staged Procedure',mkSel('f-staged',OPTS.yno,p.staged)),
+    ])
+    +mkSec('Operative Parameters')
+    +mkGrid(4,[
+      mkField('OR Time min',mkInp('f-orTime','number',p.orTime)),
+      mkField('Fluoroscopy Time min',mkInp('f-fluoro','number',p.fluoro)),
+      mkField('Contrast Volume mL',mkInp('f-contrast','number',p.contrast)),
+      mkField('Estimated Blood Loss mL',mkInp('f-ebl','number',p.ebl)),
+    ]),
+    // Tab 3: Outcomes
+    mkSec('Technical Outcomes - SVS 2020 Definitions')
+    +'<div class="info-box"><strong>Primary Technical Success (SVS 2020):</strong> Successful deployment at intended anatomical position + restoration of flow in all intended target vessels + absence of Type I or III endoleak at completion angiography.</div>'
+    +mkGrid(3,[
+      mkField('Primary Technical Success *',mkSel('f-ptSuccess',OPTS.yno,p.ptSuccess)),
+      mkField('TV Technical Success e.g. 4/4',mkInp('f-tvSuccess','text',p.tvSuccess)),
+      mkField('Intraop Endoleak - SVS 2020',mkSel('f-intraopEL',OPTS.endoleak,p.intraopEL)),
+    ])
+    +mkSec('Spinal Cord Ischaemia - ESVS 2026 / SVS 2020')
+    +mkGrid(4,[
+      mkField('SCI',mkSel('f-sci',OPTS.yno,p.sci)),
+      mkField('Tarlov Grade',mkSel('f-sciGrade',OPTS.sciG,p.sciGrade)),
+      mkField('Permanent SCI Tarlov less than 3 at 30d',mkSel('f-sciPerm',OPTS.yno,p.sciPerm)),
+      mkField('SCI Onset',mkSel('f-sciOnset',OPTS.sciO,p.sciOnset)),
+      mkField('Stroke',mkSel('f-stroke',OPTS.yno,p.stroke)),
+    ])
+    +mkSec('Renal Outcomes - KDIGO 2012')
+    +mkGrid(3,[
+      mkField('AKI',mkSel('f-aki',OPTS.yno,p.aki)),
+      mkField('AKI Stage KDIGO',mkSel('f-akiStage',OPTS.aki,p.akiStage)),
+      mkField('New RRT',mkSel('f-rrt',OPTS.yno,p.rrt)),
+    ])
+    +mkSec('MAE Composite and 30-Day Outcomes')
+    +mkGrid(4,[
+      mkField('Bowel Ischaemia',mkSel('f-bowel',OPTS.yno,p.bowel)),
+      mkField('Myocardial Infarction',mkSel('f-mi',OPTS.yno,p.mi)),
+      mkField('ICU Stay days',mkInp('f-icu','number',p.icu)),
+      mkField('Hospital Stay days',mkInp('f-hospital','number',p.hospital)),
+      mkField('30-Day Mortality',mkSel('f-mort30d',OPTS.yno,p.mort30d)),
+      mkField('Cause of Death if applicable',mkInp('f-cause30d','text',p.cause30d)),
+      mkField('MAE Composite *',mkSel('f-mae',OPTS.yno,p.mae)),
+    ])
+    +mkSec('Target Vessel Patency - SVS 2020 Primary Endpoint Freedom from TVI')
+    +mkGrid(4,[
+      mkField('Celiac Patency',mkSel('f-celiacP',OPTS.patency,p.celiacP)),
+      mkField('SMA Patency',mkSel('f-smaP',OPTS.patency,p.smaP)),
+      mkField('L Renal Patency',mkSel('f-lRenalP',OPTS.patency,p.lRenalP)),
+      mkField('R Renal Patency',mkSel('f-rRenalP',OPTS.patency,p.rRenalP)),
+      mkField('TVI Event SVS 2020 Primary Endpoint',mkSel('f-tvi',OPTS.yno,p.tvi)),
+      mkField('TVI Type',mkSel('f-tviType',OPTS.tviT,p.tviType)),
+    ]),
+    // Tab 4: Follow-Up
+    buildFUTab(p),
+  ];
+}
+function buildFUTab(p){
+  var fus=p.followups||[];
+  var html='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">'
+    +'<div style="color:var(--ts);font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase">ESVS 2024 Surveillance: 1m - 6m - 12m - Annual</div>'
+    +'<button class="btn btn-cyan btn-secondary btn-small" onclick="addFU()" style="padding:5px 12px;font-size:12px">+ Add Visit</button></div>';
+  if(!fus.length)html+='<div class="no-data">No follow-up visits yet. Click Add Visit to begin.</div>';
+  fus.forEach(function(f,i){
+    html+='<div class="fu-card" id="fu-card-'+i+'">'
+      +'<div class="fu-hdr"><div class="fu-title">Visit '+(i+1)+(f.date?' - '+f.date:'')+'</div>'
+      +'<button class="btn btn-danger btn-small" onclick="rmFU('+i+')">Remove</button></div>'
+      +mkGrid(4,[
+        mkField('Follow-up Date',mkInp('fu-'+i+'-date','date',f.date)),
+        mkField('Days from Procedure',mkInp('fu-'+i+'-days','number',f.days)),
+        mkField('Imaging Modality',mkSel('fu-'+i+'-modality',OPTS.img,f.modality)),
+        mkField('Max Sac Diam mm',mkInp('fu-'+i+'-maxSac','number',f.maxSac)),
+        mkField('Sac Delta vs Baseline mm',mkInp('fu-'+i+'-sacDelta','text',f.sacDelta)),
+        mkField('Sac Trend SVS 2020',mkSel('fu-'+i+'-sacTrend',OPTS.sacT,f.sacTrend)),
+        mkField('Endoleak SVS 2020',mkSel('fu-'+i+'-endoleak',OPTS.endoleak,f.endoleak)),
+        mkField('Device Integrity',mkSel('fu-'+i+'-integrity',OPTS.integ,f.integrity)),
+        mkField('TVI Event',mkSel('fu-'+i+'-tvi',OPTS.yno,f.tvi)),
+        mkField('Reintervention',mkSel('fu-'+i+'-reinterv',OPTS.yno,f.reinterv)),
+        mkField('Reintervention Type',mkSel('fu-'+i+'-reintervType',OPTS.reintT,f.reintervType)),
+        mkField('Vital Status',mkSel('fu-'+i+'-vital',OPTS.vital,f.vital)),
+      ])
+      +'</div>';
+  });
+  return html;
+}
+var fuNewCount=0;
+function addFU(){
+  var i=fuNewCount++;
+  var card=document.createElement('div');
+  card.className='fu-card';card.id='fu-new-'+i;
+  card.innerHTML='<div class="fu-hdr"><div class="fu-title">New Visit</div>'
+    +'<button class="btn btn-danger btn-small" onclick="this.closest(\'.fu-card\').remove()">Remove</button></div>'
+    +mkGrid(4,[
+      mkField('Follow-up Date',mkInp('fu-n'+i+'-date','date','')),
+      mkField('Days from Procedure',mkInp('fu-n'+i+'-days','number','')),
+      mkField('Imaging Modality',mkSel('fu-n'+i+'-modality',OPTS.img,'')),
+      mkField('Max Sac Diam mm',mkInp('fu-n'+i+'-maxSac','number','')),
+      mkField('Sac Delta vs Baseline mm',mkInp('fu-n'+i+'-sacDelta','text','')),
+      mkField('Sac Trend SVS 2020',mkSel('fu-n'+i+'-sacTrend',OPTS.sacT,'')),
+      mkField('Endoleak SVS 2020',mkSel('fu-n'+i+'-endoleak',OPTS.endoleak,'')),
+      mkField('Device Integrity',mkSel('fu-n'+i+'-integrity',OPTS.integ,'')),
+      mkField('TVI Event',mkSel('fu-n'+i+'-tvi',OPTS.yno,'')),
+      mkField('Reintervention',mkSel('fu-n'+i+'-reinterv',OPTS.yno,'')),
+      mkField('Reintervention Type',mkSel('fu-n'+i+'-reintervType',OPTS.reintT,'')),
+      mkField('Vital Status',mkSel('fu-n'+i+'-vital',OPTS.vital,'')),
+    ]);
+  document.getElementById('formBody').appendChild(card);
+}
+function rmFU(i){var el=document.getElementById('fu-card-'+i);if(el)el.remove();}
+function gv(id){var el=document.getElementById(id);return el?el.value:'';}
+function collectFUs(){
+  var fus=[],i=0;
+  while(true){
+    if(!document.getElementById('fu-'+i+'-date'))break;
+    var card=document.getElementById('fu-card-'+i);
+    if(card){fus.push({date:gv('fu-'+i+'-date'),days:gv('fu-'+i+'-days'),modality:gv('fu-'+i+'-modality'),maxSac:gv('fu-'+i+'-maxSac'),sacDelta:gv('fu-'+i+'-sacDelta'),sacTrend:gv('fu-'+i+'-sacTrend'),endoleak:gv('fu-'+i+'-endoleak'),integrity:gv('fu-'+i+'-integrity'),tvi:gv('fu-'+i+'-tvi'),reinterv:gv('fu-'+i+'-reinterv'),reintervType:gv('fu-'+i+'-reintervType'),vital:gv('fu-'+i+'-vital')});}
+    i++;if(i>200)break;
+  }
+  for(var j=0;j<fuNewCount;j++){
+    var nc=document.getElementById('fu-new-'+j);
+    if(nc)fus.push({date:gv('fu-n'+j+'-date'),days:gv('fu-n'+j+'-days'),modality:gv('fu-n'+j+'-modality'),maxSac:gv('fu-n'+j+'-maxSac'),sacDelta:gv('fu-n'+j+'-sacDelta'),sacTrend:gv('fu-n'+j+'-sacTrend'),endoleak:gv('fu-n'+j+'-endoleak'),integrity:gv('fu-n'+j+'-integrity'),tvi:gv('fu-n'+j+'-tvi'),reinterv:gv('fu-n'+j+'-reinterv'),reintervType:gv('fu-n'+j+'-reintervType'),vital:gv('fu-n'+j+'-vital')});
+  }
+  return fus;
+}
+function openForm(id){
+  var pt=id?patients.find(function(p){return p.id===id;}):null;
+  editingId=pt?pt.id:null;fuNewCount=0;
+  document.getElementById('formTitle').textContent=pt?'Edit: '+pt.id:'New Case';
+  buildFormTabs(pt);showTab(0);showPage('form');
+}
+function showTab(i){
+  currentTab=i;
+  document.getElementById('formBody').innerHTML=formTabs[i]||'';
+  document.querySelectorAll('.form-tab').forEach(function(t,j){t.classList.toggle('active',j===i);});
+}
+function cancelForm(){showPage('list');}
+async function saveForm(){
+  var id=gv('f-id').trim();
+  if(!id){alert('Case ID is required.');return;}
+  if(!gv('f-procedureDate')){alert('Procedure Date is required.');return;}
+  var pt={
+    id:id,procedureDate:gv('f-procedureDate'),hn:gv('f-hn'),age:gv('f-age'),sex:gv('f-sex'),bmi:gv('f-bmi'),asa:gv('f-asa'),
+    htn:gv('f-htn'),dm:gv('f-dm'),dyslipaemia:gv('f-dyslipaemia'),smoking:gv('f-smoking'),packYears:gv('f-packYears'),
+    cad:gv('f-cad'),copd:gv('f-copd'),ckd:gv('f-ckd'),egfr:gv('f-egfr'),pvd:gv('f-pvd'),cvd:gv('f-cvd'),
+    frailtyTool:gv('f-frailtyTool'),frailtyScore:gv('f-frailtyScore'),frailtyGrade:gv('f-frailtyGrade'),
+    presentation:gv('f-presentation'),diagnosis:gv('f-diagnosis'),extent:gv('f-extent'),
+    maxDiam:gv('f-maxDiam'),proxNeck:gv('f-proxNeck'),neckAngle:gv('f-neckAngle'),neckCalc:gv('f-neckCalc'),
+    ifu:gv('f-ifu'),sdm:gv('f-sdm'),procType:gv('f-procType'),deviceStrategy:gv('f-deviceStrategy'),
+    brand:gv('f-brand'),model:gv('f-model'),proxDiam:gv('f-proxDiam'),proxSeal:gv('f-proxSeal'),
+    fenestrations:gv('f-fenestrations'),branches:gv('f-branches'),
+    celiac:gv('f-celiac'),sma:gv('f-sma'),lRenal:gv('f-lRenal'),rRenal:gv('f-rRenal'),lSubcl:gv('f-lSubcl'),
+    ana:gv('f-ana'),csfDrain:gv('f-csfDrain'),spinal:gv('f-spinal'),mapTarget:gv('f-mapTarget'),staged:gv('f-staged'),
+    orTime:gv('f-orTime'),fluoro:gv('f-fluoro'),contrast:gv('f-contrast'),ebl:gv('f-ebl'),
+    ptSuccess:gv('f-ptSuccess'),tvSuccess:gv('f-tvSuccess'),intraopEL:gv('f-intraopEL'),
+    sci:gv('f-sci'),sciGrade:gv('f-sciGrade'),sciPerm:gv('f-sciPerm'),sciOnset:gv('f-sciOnset'),stroke:gv('f-stroke'),
+    aki:gv('f-aki'),akiStage:gv('f-akiStage'),rrt:gv('f-rrt'),bowel:gv('f-bowel'),mi:gv('f-mi'),
+    icu:gv('f-icu'),hospital:gv('f-hospital'),mort30d:gv('f-mort30d'),cause30d:gv('f-cause30d'),mae:gv('f-mae'),
+    celiacP:gv('f-celiacP'),smaP:gv('f-smaP'),lRenalP:gv('f-lRenalP'),rRenalP:gv('f-rRenalP'),
+    tvi:gv('f-tvi'),tviType:gv('f-tviType'),
+    followups:collectFUs(),
+  };
+  var saveBtn=document.getElementById('saveBtn');
+  var savingMsg=document.getElementById('savingMsg');
+  saveBtn.disabled=true;savingMsg.style.display='inline';
+  try{
+    await savePatient(pt);
+    renderAll();showPage('list');
+    showToast((editingId?'Updated':'Added')+' '+id+(isDemo?' (demo)':' saved to Google Sheets'),'success');
+  }catch(err){showToast('Save failed: '+err.message,'error');}
+  saveBtn.disabled=false;savingMsg.style.display='none';
+}
+
+// ─── NAVIGATION ───────────────────────────────────────────────────────────────
+function showPage(name){
+  document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});
+  document.querySelectorAll('.nav-btn').forEach(function(b){b.classList.remove('active');});
+  var pg=document.getElementById('page-'+name);if(pg)pg.classList.add('active');
+  var nb=document.getElementById('nav-'+name);if(nb)nb.classList.add('active');
+  if(name==='dashboard')renderDashboard();
+  if(name==='list')renderList();
+  if(name==='export')renderExport();
+}
+
+// ─── TOAST ────────────────────────────────────────────────────────────────────
+var toastTmr;
+function showToast(msg,type){
+  var t=document.getElementById('toast');
+  var cols={success:'var(--green)',error:'var(--red)',info:'var(--amber)'};
+  t.style.display='flex';t.style.borderColor=cols[type]||cols.info;t.style.color=cols[type]||cols.info;
+  document.getElementById('toastMsg').textContent=msg;
+  clearTimeout(toastTmr);toastTmr=setTimeout(hideToast,4500);
+}
+function hideToast(){document.getElementById('toast').style.display='none';}
+
+</script>
+</body>
+</html>
