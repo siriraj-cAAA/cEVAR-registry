@@ -488,6 +488,8 @@ function handleZoneImgClick(event){
 
 function resetZones(){
   ZS={prox:null,dist:null};
+  var msg=document.getElementById('zoneMsg');
+  if(msg){msg.style.color='#7a90b0';msg.textContent='Click a zone on the aorta to select proximal landing zone first';}
   // Reset canvas to base image
   preloadZoneImages();
   var canvas=document.getElementById('zoneCanvas');
@@ -513,9 +515,31 @@ function resetZones(){
 
 
 function zoneClick(n){
-  if(ZS.prox===null){ZS.prox=n;}
-  else if(ZS.dist===null&&n!==ZS.prox){ZS.dist=n;}
-  else{ZS={prox:n,dist:null};}
+  var msg=document.getElementById('zoneMsg');
+  if(ZS.prox===null){
+    // First click = proximal
+    ZS.prox=n;
+    if(msg){msg.style.display='block';msg.style.color='#1a6fd4';msg.textContent='Proximal: Zone '+n+' selected. Now click a more distal zone.';}
+  } else if(ZS.dist===null){
+    if(n===ZS.prox){
+      // Same zone - cancel
+      ZS={prox:null,dist:null};
+      if(msg){msg.style.display='block';msg.style.color='#f09030';msg.textContent='Selection cleared. Click to select proximal zone.';}
+      renderZoneCanvas();updateZones();return;
+    }
+    if(n<ZS.prox){
+      // Clicked a zone more proximal than selected proximal - reject
+      if(msg){msg.style.display='block';msg.style.color='#e03030';msg.textContent='Zone '+n+' is more proximal than your proximal zone (Zone '+ZS.prox+'). Please click a zone below Zone '+ZS.prox+'.';}
+      return;
+    }
+    // Valid distal selection
+    ZS.dist=n;
+    if(msg){msg.style.display='block';msg.style.color='#ff8c00';msg.textContent='Coverage: Zone '+ZS.prox+' → Zone '+n+'. Click any zone to reset.';}
+  } else {
+    // Both selected - reset and start over
+    ZS={prox:n,dist:null};
+    if(msg){msg.style.display='block';msg.style.color='#1a6fd4';msg.textContent='Reset. Proximal: Zone '+n+' selected. Now click a more distal zone.';}
+  }
   updateZones();
   renderZoneCanvas();
 }
@@ -596,12 +620,13 @@ function buildTabs(p){
   var zoneTab=sh('Aortic Landing Zones - Ishimaru Classification (Click zone on image to mark extent)')
     +'<div style="display:grid;grid-template-columns:auto 1fr;gap:20px;align-items:start;margin-bottom:14px">'
     +'<div>'
-    +'<div class="ztip">&#9312; <strong style="color:#1a6fd4">1st click</strong> = Proximal zone (blue) &nbsp;&nbsp; &#9313; <strong style="color:#1a6fd4">2nd click</strong> = Distal zone (blue) &nbsp;&nbsp; Covered segment turns <strong style="color:#ff8c00">orange</strong></div>'
+    +'<div class="ztip"><strong style="color:#1a6fd4">1st click</strong> = Proximal zone (blue) &nbsp; <strong style="color:#1a6fd4">2nd click</strong> = Distal zone, must be below proximal (blue) &nbsp; Covered segment = <strong style="color:#ff8c00">orange</strong></div>'
     +'<div id="zimgwrap" style="display:inline-block;line-height:0;border-radius:8px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.5)">'
     +'<canvas id="zoneCanvas" style="display:block;height:460px;width:auto;cursor:crosshair" onclick="handleZoneImgClick(event)"></canvas>'
     +'<div style="text-align:center;margin-top:8px"><button type="button" class="btn br" onclick="resetZones()" style="font-size:12px;padding:5px 18px">&#8635; Reset</button></div>'
     +'</div></div>'
     +'<div>'
+    +'<div id="zoneMsg" style="font-size:12px;font-weight:600;color:#7a90b0;background:#112240;border-radius:6px;padding:8px 12px;margin-bottom:10px">Click a zone on the aorta to select proximal landing zone first</div>'
     +'<div class="zpanel" style="border-color:#1a6fd4"><div class="zpanel-lbl" style="color:#1a6fd4">&#9670; Proximal Zone</div><div id="proxDisp" class="zpanel-val">Click a zone on the image</div></div>'
     +'<div class="zpanel" style="border-color:#e03030"><div class="zpanel-lbl" style="color:#1a6fd4">&#9670; Distal Zone</div><div id="distDisp" class="zpanel-val">Click a zone on the image</div></div>'
     +'<div id="covDisp" class="zpanel" style="border-color:#ff8c00;display:none;color:#ff8c00;font-weight:700;font-size:15px;padding:10px 14px"></div>'
