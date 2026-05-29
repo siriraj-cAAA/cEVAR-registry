@@ -441,28 +441,30 @@ function renderZoneCanvas(){
 }
 
 function drawZoneColor(ctx,img,color){
-  // Draw zone image to temp canvas, recolor cyan→target color, composite
+  // Step 1: draw zone image to temp canvas
   var tmp=document.createElement('canvas');
   tmp.width=IMG_NAT_W;tmp.height=IMG_NAT_H;
   var tc=tmp.getContext('2d');
   tc.drawImage(img,0,0,IMG_NAT_W,IMG_NAT_H);
   var id=tc.getImageData(0,0,IMG_NAT_W,IMG_NAT_H);
   var d=id.data;
+  // Step 2: recolour cyan pixels to target colour, zero-out everything else
   for(var i=0;i<d.length;i+=4){
-    var r=d[i],g=d[i+1],b=d[i+2],a=d[i+3];
-    // Detect cyan/blue highlight: blue dominant, green decent, not white, not dark
-    if(a>50 && b>140 && b>r*1.2 && g>r && !(r>200&&g>200&&b>200)){
-      var br=b/220; // preserve brightness from original blue channel
-      d[i]  =Math.min(255,Math.round(color[0]*br+color[0]*0.15));
-      d[i+1]=Math.min(255,Math.round(color[1]*br+color[1]*0.15));
-      d[i+2]=Math.min(255,Math.round(color[2]*br+color[2]*0.15));
-      d[i+3]=Math.min(255,a+30);
+    var r=d[i],g=d[i+1],b=d[i+2];
+    // Cyan/blue highlight: B dominant over R, and G > R
+    var isCyan=(b>120 && b>r*1.15 && g>r && !(r>210&&g>210&&b>210) && !(r<30&&g<30&&b<30));
+    if(isCyan){
+      var br=Math.min(1.0,(b+g)/(220*2));
+      d[i]  =Math.min(255,Math.round(color[0]*(0.5+br*0.7)));
+      d[i+1]=Math.min(255,Math.round(color[1]*(0.5+br*0.7)));
+      d[i+2]=Math.min(255,Math.round(color[2]*(0.5+br*0.7)));
+      d[i+3]=220;
     } else {
-      // Non-highlighted pixel: make transparent so base shows through
-      d[i+3]=0;
+      d[i+3]=0; // fully transparent - base image shows through
     }
   }
   tc.putImageData(id,0,0);
+  // Step 3: composite using source-over (transparent px = see-through)
   ctx.drawImage(tmp,0,0,IMG_NAT_W,IMG_NAT_H);
 }
 
@@ -663,7 +665,7 @@ function buildTabs(p){
     +'</div>'
     // PARARENAL / JUXTARENAL
     +'<div>'
-    +'<div style="color:#dde5f0;font-weight:700;font-size:13px;margin-bottom:8px">Short-neck / Pararenal / Juxtarenal - AAA Classification</div>'
+    +'<div style="color:#dde5f0;font-weight:700;font-size:13px;margin-bottom:8px">Complex Abdominal Aortic Aneurysm Classification (Fenestrated EVAR)</div>'
     +'<img src=PARARENAL_IMG style="width:100%;border-radius:7px;background:#fff;padding:4px;margin-bottom:10px">'
     +'<div style="display:flex;gap:6px;flex-wrap:wrap">'
     +'<button type="button" id="pe-A" class="extbtn" data-extval="Juxtarenal" data-extgrp="pe"  title="Infrarenal - neck <10mm">A - Short-neck</button>'
@@ -739,6 +741,18 @@ function collectFUs(){
   }
   for(var j=0;j<fuCount;j++){if(document.getElementById('fuc-n'+j)){fus.push({date:gv('fu-n'+j+'-date'),days:gv('fu-n'+j+'-days'),modality:gv('fu-n'+j+'-modality'),maxSac:gv('fu-n'+j+'-maxSac'),sacDelta:gv('fu-n'+j+'-sacDelta'),sacTrend:gv('fu-n'+j+'-sacTrend'),endoleak:gv('fu-n'+j+'-endoleak'),integrity:gv('fu-n'+j+'-integrity'),tvi:gv('fu-n'+j+'-tvi'),reinterv:gv('fu-n'+j+'-reinterv'),reintervType:gv('fu-n'+j+'-reintervType'),vital:gv('fu-n'+j+'-vital')});}}
   return fus;
+}
+
+function showPg(name){
+  document.querySelectorAll('.pg').forEach(function(p){p.classList.remove('active');});
+  document.querySelectorAll('.nb').forEach(function(b){b.classList.remove('active');});
+  var pg=document.getElementById('pg-'+name);
+  if(pg)pg.classList.add('active');
+  var nb=document.getElementById('nb-'+name);
+  if(nb)nb.classList.add('active');
+  if(name==='dashboard')renderDash();
+  if(name==='list')renderList();
+  if(name==='export')renderExport();
 }
 function openForm(id){
   editId=id||null;fuCount=0;ZS={prox:null,dist:null};
