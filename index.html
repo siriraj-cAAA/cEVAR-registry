@@ -425,8 +425,8 @@ function renderZoneCanvas(){
     if(!zImg)continue;
     var color;
     if(z===lo)      color=[26,111,212];    // Blue  - proximal
-    else if(z===hi) color=[220,50,50];     // Red   - distal
-    else            color=[13,184,122];    // Green - coverage
+    else if(z===hi) color=[26,111,212];    // Blue  - distal
+    else            color=[255,140,0];     // Orange - coverage
     if(zImg.complete){
       drawZoneColor(ctx,zImg,color);
     } else {
@@ -540,7 +540,7 @@ function updateZones(){
   if(pn)pn.textContent=ZS.prox!==null?ZONE_NAMES_SHORT[ZS.prox]:'Click a zone on the image';
   if(dn)dn.textContent=ZS.dist!==null?ZONE_NAMES_SHORT[ZS.dist]:'Click a zone on the image';
   if(cn){
-    if(lo!==null){cn.style.display='block';cn.textContent='Zone '+lo+' to Zone '+hi+' ('+(hi-lo)+' zones)';}
+    if(lo!==null){cn.style.display='block';cn.textContent='Covered segment: Zone '+lo+' → Zone '+hi+' ('+(hi-lo)+' zones)';}
     else cn.style.display='none';
   }
   // Sync dropdowns + text
@@ -596,15 +596,15 @@ function buildTabs(p){
   var zoneTab=sh('Aortic Landing Zones - Ishimaru Classification (Click zone on image to mark extent)')
     +'<div style="display:grid;grid-template-columns:auto 1fr;gap:20px;align-items:start;margin-bottom:14px">'
     +'<div>'
-    +'<div class="ztip">&#9312; <strong style="color:#1a6fd4">1st click</strong> = Proximal landing zone (blue) &nbsp;&nbsp; &#9313; <strong style="color:#e03030">2nd click</strong> = Distal landing zone (red) &nbsp;&nbsp; Covered segment turns <strong style="color:#0db87a">green</strong></div>'
+    +'<div class="ztip">&#9312; <strong style="color:#1a6fd4">1st click</strong> = Proximal zone (blue) &nbsp;&nbsp; &#9313; <strong style="color:#1a6fd4">2nd click</strong> = Distal zone (blue) &nbsp;&nbsp; Covered segment turns <strong style="color:#ff8c00">orange</strong></div>'
     +'<div id="zimgwrap" style="display:inline-block;line-height:0;border-radius:8px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.5)">'
     +'<canvas id="zoneCanvas" style="display:block;height:460px;width:auto;cursor:crosshair" onclick="handleZoneImgClick(event)"></canvas>'
     +'<div style="text-align:center;margin-top:8px"><button type="button" class="btn br" onclick="resetZones()" style="font-size:12px;padding:5px 18px">&#8635; Reset</button></div>'
     +'</div></div>'
     +'<div>'
     +'<div class="zpanel" style="border-color:#1a6fd4"><div class="zpanel-lbl" style="color:#1a6fd4">&#9670; Proximal Zone</div><div id="proxDisp" class="zpanel-val">Click a zone on the image</div></div>'
-    +'<div class="zpanel" style="border-color:#e03030"><div class="zpanel-lbl" style="color:#e03030">&#9670; Distal Zone</div><div id="distDisp" class="zpanel-val">Click a zone on the image</div></div>'
-    +'<div id="covDisp" class="zpanel" style="border-color:#0db87a;display:none;color:#0db87a;font-weight:700;font-size:14px;padding:10px 14px"></div>'
+    +'<div class="zpanel" style="border-color:#e03030"><div class="zpanel-lbl" style="color:#1a6fd4">&#9670; Distal Zone</div><div id="distDisp" class="zpanel-val">Click a zone on the image</div></div>'
+    +'<div id="covDisp" class="zpanel" style="border-color:#ff8c00;display:none;color:#ff8c00;font-weight:700;font-size:15px;padding:10px 14px"></div>'
     +'<div class="zgrid">'
     +fld('Proximal Landing Zone',sel('f-proxZone',OPTS.zone,pv.proxZone))
     +fld('Distal Landing Zone',sel('f-distZone',OPTS.zone,pv.distZone))
